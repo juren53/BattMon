@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- Battery Outline -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M160,96h32v32h128v-32h32v64h32v256h-256v-256h32v-64zM192,128v-32h128v32h-128z"/>
+
+    <!-- Battery Level -->
+    <path
+        android:fillColor="#8BC34A"
+        android:pathData="M160,160h192v192h-192z"/>
+
+    <!-- Battery Terminal -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M192,96h128v32h-128z"/>
+
+    <!-- Battery Percentage -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M210,220h100v72h-100z"/>
+    
+    <!-- Percentage Text Simulation (simplified) -->
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M224,240h14v32h-14z"/>
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M246,240h14v32h-14z"/>
+    <path
+        android:fillColor="#4CAF50"
+        android:pathData="M268,240h14v32h-14z"/>
+</vector>

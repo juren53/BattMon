@@ -9,7 +9,7 @@
     <!-- Header -->
     <TextView
         android:id="@+id/textHelpTitle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:padding="16dp"
@@ -18,8 +18,18 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/appIconHelp"
         app:layout_constraintTop_toTopOf="parent" />
+        
+    <ImageView
+        android:id="@+id/appIconHelp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="16dp"
+        android:src="@drawable/battery_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/textHelpTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textHelpTitle" />
 
     <!-- Version Number -->
     <TextView
