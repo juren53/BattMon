@@ -1,0 +1,122 @@
+================================================================================
+                  BATTMON V0.01 - TEST RESULTS REPORT
+================================================================================
+
+Date: April 26, 2025
+Project: Battery Monitor Android Application
+
+--------------------------------------------------------------------------------
+                                INTRODUCTION
+--------------------------------------------------------------------------------
+
+This report documents the testing of the Battery Monitor app (BattMon) version 
+0.01. The app was successfully built, installed, and tested on a connected 
+Android device. The testing focused on verifying the core functionality of 
+battery level monitoring, as well as confirming the presence of new features 
+added in v0.01, specifically the version number display and the Help/About menu 
+options.
+
+--------------------------------------------------------------------------------
+                           KEY FEATURES TESTED
+--------------------------------------------------------------------------------
+
+1. INSTALLATION AND LAUNCH
+   - The app was successfully built using Gradle 7.4.2
+   - The APK was successfully installed on the connected device
+   - The app launched properly, transitioning from the splash screen to the
+     main activity
+
+2. BATTERY LEVEL MONITORING
+   - The app correctly detected and displayed the current battery level
+   - We tested with simulated battery levels using ADB commands:
+     * 45% (below the 50% threshold - alerts every 5 minutes)
+     * 35% (below the 40% threshold - alerts every 3 minutes)
+     * 25% (below the 30% threshold - alerts every 2 minutes)
+   - Each level change was properly detected by the app as confirmed in the logs
+   - The MainActivity.java logs showed proper updates: "Battery level updated: XX%"
+
+3. CHARGING STATE DETECTION
+   - We simulated a charging state using ADB commands
+   - The system logs confirmed that charging events were detected
+   - The app was receiving these charging state changes
+
+--------------------------------------------------------------------------------
+                     UI FEATURES NEEDING MANUAL VERIFICATION
+--------------------------------------------------------------------------------
+
+The following features could not be directly tested through ADB commands as they
+require user interaction with the UI or involve non-exported activities:
+
+1. VERSION NUMBER DISPLAY
+   - The "v0.01" version number should appear in the upper right corner of all
+     screens (Main, Help, and About)
+   - It should be displayed with:
+     * Slightly transparent appearance (alpha 0.6)
+     * Smaller font size (12sp)
+     * Italic styling
+
+2. MENU OPTIONS
+   - The three-dot menu in the upper right corner should display:
+     * A "Help" option that opens the Help screen
+     * An "About" option that opens the About screen
+   - Both screens should provide appropriate information
+   - Back navigation should work correctly from both screens
+
+3. MONITORING FUNCTIONALITY
+   - The monitoring switch should enable/disable the battery monitoring service
+   - When enabled, a notification should appear showing the battery status
+   - The status text should change appropriately based on monitoring state
+   - Alerts should trigger at appropriate intervals based on battery level
+
+--------------------------------------------------------------------------------
+                             TEST CLEANUP
+--------------------------------------------------------------------------------
+
+After completing the tests, the following cleanup actions were performed:
+
+1. Battery simulation was reset using: adb shell dumpsys battery reset
+   This returned the device to reporting its actual battery level rather than
+   the simulated test values.
+
+2. All test data and temporary settings were cleared.
+
+--------------------------------------------------------------------------------
+                               NEXT STEPS
+--------------------------------------------------------------------------------
+
+The following additional tests are recommended for manual verification:
+
+1. COMPLETE UI TESTING
+   - Enable the monitoring switch to test the actual notification functionality
+   - Try the menu options to verify Help and About screens work correctly
+   - Verify that all screens display the version number as designed
+
+2. REAL-WORLD USAGE TESTING
+   - Use the app during normal battery discharge to test the alert thresholds
+   - Verify alerts are triggered at appropriate intervals
+   - Verify that alerts stop when charging and resume when unplugged
+   - Test the app's reliability over extended periods
+
+3. EDGE CASE TESTING
+   - Test behavior when battery is critically low (<10%)
+   - Verify behavior during rapid charging/discharging
+   - Check how the app behaves after device restart
+   - Ensure the app doesn't consume excessive resources
+
+--------------------------------------------------------------------------------
+                               CONCLUSION
+--------------------------------------------------------------------------------
+
+The BattMon v0.01 app has been successfully tested and meets the basic
+requirements for battery monitoring functionality. The app correctly detects
+battery level changes and responds appropriately. The new features (version
+number display and Help/About menu) have been implemented, though they require
+manual verification.
+
+The app is now ready for user testing to verify its effectiveness in real-world
+scenarios and to identify any areas for improvement in future versions.
+
+================================================================================
+                               END OF REPORT
+================================================================================
+

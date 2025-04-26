@@ -1,0 +1,97 @@
+# BATTERY MONITOR - TECHNICAL IMPLEMENTATION DETAILS
+
+## ARCHITECTURE OVERVIEW
+
+The Battery Monitor app follows a service-based architecture where a foreground service continuously monitors battery levels and provides alerts based on predefined thresholds. The app uses standard Android components and APIs to achieve efficient battery monitoring with minimal resource usage.
+
+## KEY COMPONENTS AND IMPLEMENTATION
+
+1. BATTERY MONITORING (BatteryMonitorService.java)
+   - Implements Android Service class with START_STICKY return value to ensure service restart
+   - Uses BroadcastReceiver to listen for ACTION_BATTERY_CHANGED intents
+   - Calculates battery percentage: level/scale * 100
+   - Uses Handler with postDelayed() to schedule periodic alert checks
+   - Detects charging state changes via ACTION_POWER_CONNECTED and ACTION_POWER_DISCONNECTED intents
+   - Implements different alert intervals based on battery level thresholds
+
+2. USER INTERFACE (MainActivity.java)
+   - Updates UI with current battery level using BroadcastReceiver
+   - Manages SharedPreferences to store monitoring state
+   - Provides switch to enable/disable monitoring service
+   - Starts/stops BatteryMonitorService based on user preference
+   - Updates progress bar and text display with battery information
+   - Shows different status information based on battery level and charging state
+
+3. BOOT HANDLING (BootReceiver.java)
+   - Extends BroadcastReceiver to listen for BOOT_COMPLETED intent
+   - Checks SharedPreferences to determine if monitoring was enabled
+   - Starts BatteryMonitorService if monitoring was previously enabled
+   - Handles API level differences for starting foreground services
+
+4. NOTIFICATION SYSTEM
+   - Creates dedicated notification channels for Android 8.0+ (API 26+)
+   - Uses NotificationManager for persistent service notification
+   - Creates a separate high-priority notification channel for alerts
+   - Implements audible alerts using MediaPlayer with default notification sound
+   - Provides actionable notifications to open the app
+
+5. SPLASH SCREEN (SplashActivity.java)
+   - Short display (1.5 seconds) with fade animation
+   - Uses Handler to delay launch of MainActivity
+   - Implements smooth transition between activities
+
+## DATA PERSISTENCE
+
+1. SharedPreferences
+   - Stores boolean flag "monitoring_enabled" to track user preference
+   - Used to restore state after app restart or device reboot
+   - Managed with apply() for asynchronous writes to avoid UI blocking
+
+## PERFORMANCE OPTIMIZATIONS
+
+1. RESOURCE USAGE
+   - Battery monitoring via system broadcasts instead of polling
+   - Alert scheduling based on actual battery thresholds rather than continuous checking
+   - Cancels scheduled alerts when charging to conserve resources
+   - Uses lightweight drawable resources
+
+2. CODE OPTIMIZATION
+   - ProGuard rules to remove unused code
+   - Specific rules for MediaPlayer and notification classes
+   - Preservation of critical app components
+   - Removal of debug logging in release builds
+
+3. MEMORY MANAGEMENT
+   - Proper cleanup in onDestroy() method
+   - Release of MediaPlayer resources when not needed
+   - Unregistering BroadcastReceivers to prevent leaks
+
+## TECHNICAL DETAILS BY THRESHOLD
+
+1. 50% Battery Level
+   - Alert Interval: 5 minutes (300,000 ms)
+   - Notification Priority: DEFAULT
+   - Sound: Default notification sound
+
+2. 40% Battery Level
+   - Alert Interval: 3 minutes (180,000 ms)
+   - Notification Priority: HIGH
+   - Sound: Default notification sound
+
+3. 30% Battery Level
+   - Alert Interval: 2 minutes (120,000 ms)
+   - Notification Priority: HIGH
+   - Sound: Default notification sound
+   - Text marked as CRITICAL
+
+## BUILD CONFIGURATION
+
+1. Gradle Settings
+   - Target SDK: 30 (Android 11)
+   - Minimum SDK: 26 (Android 8.0)
+   - Gradle memory optimization via gradle.properties
+   - R8 full mode enabled for aggressive code optimization
+   - Resource optimization enabled
+
+The implementation focuses on reliability while maintaining minimal resource usage. The app is designed to be lightweight while providing essential functionality to help users avoid unexpected battery depletion.
+

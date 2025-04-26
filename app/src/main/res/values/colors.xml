@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#4CAF50</color>
+    
+    <!-- Battery status colors -->
+    <color name="batteryHigh">#4CAF50</color>     <!-- Green -->
+    <color name="batteryMedium">#FFC107</color>   <!-- Amber -->
+    <color name="batteryLow">#FF5722</color>      <!-- Deep Orange -->
+    <color name="batteryCritical">#F44336</color> <!-- Red -->
+    
+    <!-- Common colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="gray">#757575</color>
+    <color name="light_gray">#EEEEEE</color>
+</resources>
+

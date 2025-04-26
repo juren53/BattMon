@@ -1,0 +1,181 @@
+# BATTERY MONITOR - BUILD & TESTING INSTRUCTIONS
+
+## PREREQUISITES
+
+Before building the Battery Monitor app, ensure you have the following:
+
+1. DEVELOPMENT ENVIRONMENT
+   - Java Development Kit (JDK) 8 or higher
+   - Android Studio (latest version recommended)
+   - Android SDK with API level 30 (Android 11) installed
+   - Gradle 7.0.2 or higher (or use the Gradle wrapper)
+
+2. HARDWARE/EMULATOR
+   - Android device running Android 8.0 (API 26) or higher
+   - OR Android Emulator with API 26+ image
+
+## BUILDING THE APP
+
+### USING ANDROID STUDIO (RECOMMENDED METHOD)
+
+1. OPEN THE PROJECT
+   - Launch Android Studio
+   - Select "Open an existing Android Studio project"
+   - Navigate to the BatteryMonitor directory and click "Open"
+
+2. SYNC AND RESOLVE DEPENDENCIES
+   - Wait for Gradle sync to complete
+   - If prompted about Gradle version mismatch, click "Use recommended Gradle version"
+   - Resolve any dependency issues if prompted
+
+3. BUILD THE PROJECT
+   - Select "Build > Make Project" from the menu
+   - Fix any build errors that may appear
+   - Wait for the build to complete successfully
+
+4. RUN THE APP
+   - Connect an Android device via USB (enable USB debugging)
+   - OR set up an Android Emulator
+   - Click the "Run" button (green triangle) in the toolbar
+   - Select your device/emulator and click "OK"
+   - Wait for the app to install and launch
+
+### USING COMMAND LINE
+
+1. SET UP GRADLE WRAPPER (if not already present)
+   - Open a terminal/command prompt
+   - Navigate to the BatteryMonitor directory
+   - Run: gradle wrapper --gradle-version 7.4.2
+
+2. SET ENVIRONMENT VARIABLES
+   - Set ANDROID_HOME to your Android SDK location:
+     export ANDROID_HOME=/path/to/Android/Sdk
+   - Set JAVA_HOME to your JDK installation:
+     export JAVA_HOME=/path/to/jdk
+
+3. BUILD DEBUG APK
+   - In the BatteryMonitor directory, run:
+     ./gradlew assembleDebug
+   - Look for the output APK at:
+     app/build/outputs/apk/debug/app-debug.apk
+
+4. INSTALL ON DEVICE
+   - Connect your Android device via USB
+   - Enable USB debugging on your device
+   - Run: adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+## TESTING THE APP
+
+### BASIC FUNCTIONALITY TESTING
+
+1. LAUNCH THE APP
+   - Open the Battery Monitor app on your device
+   - Verify the splash screen appears briefly
+   - Confirm the main interface loads with current battery level
+
+2. TOGGLE MONITORING
+   - Toggle the "Enable Battery Monitoring" switch to ON
+   - Verify a notification appears in the notification drawer
+   - Check that the status text updates to "Monitoring"
+
+3. CHECK NOTIFICATION
+   - Pull down the notification drawer
+   - Verify the persistent notification shows the current battery level
+   - Tap the notification to return to the app
+
+### TESTING ALERT THRESHOLDS
+
+To test alert functionality without waiting for battery drain:
+
+1. ENABLE DEVELOPER MODE ON DEVICE
+   - Go to Settings > About phone
+   - Tap "Build number" seven times
+   - Enter your PIN/pattern if prompted
+
+2. SIMULATE BATTERY LEVELS
+   - Connect device to computer via USB
+   - Enable USB debugging on device
+   - Open terminal/command prompt on computer
+   - Use ADB to simulate different battery levels:
+
+     # Test 50% threshold
+     adb shell dumpsys battery set level 45
+     # Wait about 5 minutes for alert
+
+     # Test 40% threshold
+     adb shell dumpsys battery set level 35
+     # Wait about 3 minutes for alert
+
+     # Test 30% threshold
+     adb shell dumpsys battery set level 25
+     # Wait about 2 minutes for alert
+
+3. RESET BATTERY SIMULATION
+   - When done testing, reset the battery simulation:
+     adb shell dumpsys battery reset
+
+### TESTING BOOT COMPLETION
+
+To test if the app starts on device boot:
+
+1. ENABLE MONITORING
+   - Make sure the monitoring switch is turned ON in the app
+
+2. SIMULATE BOOT COMPLETION
+   - In terminal/command prompt, run:
+     adb shell am broadcast -a android.intent.action.BOOT_COMPLETED
+   - Verify that the service starts and notification appears
+
+### TESTING CHARGING DETECTION
+
+1. ENABLE MONITORING
+   - Make sure monitoring is enabled
+
+2. SIMULATE CHARGING
+   - Run: adb shell dumpsys battery set ac 1
+   - Verify alerts stop and status shows charging
+
+3. SIMULATE UNPLUGGING
+   - Run: adb shell dumpsys battery set ac 0
+   - Verify monitoring resumes
+
+4. RESET WHEN DONE
+   - Run: adb shell dumpsys battery reset
+
+## TROUBLESHOOTING
+
+1. GRADLE SYNC ISSUES
+   - Try "File > Invalidate Caches / Restart" in Android Studio
+   - Update Gradle plugin version in build.gradle if needed
+   - Check internet connection for dependency downloads
+
+2. BUILD FAILURES
+   - Look for specific error messages in the Build output
+   - Check that compileSdkVersion matches installed SDK
+   - Verify that support libraries are updated
+
+3. RUNTIME ERRORS
+   - Check Logcat in Android Studio for exception details
+   - Verify device meets minimum API level (Android 8.0)
+   - Check that required permissions are granted
+
+## MODIFYING THE APP
+
+Key files for common modifications:
+
+1. CHANGING ALERT THRESHOLDS
+   - Edit BatteryMonitorService.java:
+     - Modify LEVEL_HIGH, LEVEL_MEDIUM, LEVEL_LOW constants
+     - Update ALERT_INTERVAL constants for timing changes
+
+2. CUSTOMIZING UI
+   - Edit activity_main.xml for layout changes
+   - Modify colors.xml for color scheme
+   - Update strings.xml for text changes
+
+3. ADDING FEATURES
+   - MainActivity.java for UI interactions
+   - BatteryMonitorService.java for background functionality
+
+For any questions or issues, refer to the detailed implementation docs or the Android developer documentation.
+

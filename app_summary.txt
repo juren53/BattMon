@@ -1,0 +1,60 @@
+# BATTERY MONITOR APP - SUMMARY
+
+## OVERVIEW
+Battery Monitor is a lightweight Android application designed to help users monitor their device's battery level and receive timely alerts when the battery is running low. The app runs in the background, continuously monitoring the battery level and provides audible warnings at configurable thresholds to remind users to charge their devices.
+
+## KEY FEATURES
+
+1. BATTERY LEVEL MONITORING
+   - Continuously monitors device battery level in real-time
+   - Displays current battery percentage with visual indicators
+   - Updates battery information even when the app is in the background
+
+2. CONFIGURABLE ALERTS
+   - At 50% battery: Alerts every 5 minutes (early warning)
+   - At 40% battery: Alerts every 3 minutes (moderate warning)
+   - At 30% battery: Alerts every 2 minutes (urgent warning)
+   - Audible notifications to ensure users are aware of battery status
+
+3. BACKGROUND OPERATION
+   - Runs efficiently as a Foreground Service
+   - Continues monitoring when the app is closed
+   - Persistent notification showing current battery status
+
+4. SMART FEATURES
+   - Auto-start on device boot (optional)
+   - Automatic pause of alerts when charging
+   - Resumes monitoring when unplugged
+   - Low resource consumption to minimize battery drain
+
+5. USER INTERFACE
+   - Clean, intuitive interface
+   - Battery level indicator with visual representation
+   - Simple toggle to enable/disable monitoring
+   - Status information showing current monitoring state
+   - Information about alert thresholds
+
+## APP COMPONENTS
+
+1. ACTIVITIES
+   - SplashActivity: Initial launch screen with app branding
+   - MainActivity: Primary user interface for controlling monitoring
+
+2. SERVICES
+   - BatteryMonitorService: Background service that monitors battery levels and triggers alerts
+
+3. RECEIVERS
+   - BootReceiver: Starts the monitoring service when the device boots (if previously enabled)
+
+4. RESOURCES
+   - Custom battery level drawable
+   - Color-coded threshold indicators
+   - Adaptive layouts for different screen sizes
+   - Localized strings for easy translation
+
+5. PERMISSIONS
+   - FOREGROUND_SERVICE: Required to run the battery monitoring service in the background
+   - RECEIVE_BOOT_COMPLETED: Required to start the service when the device boots
+
+This app is designed to be lightweight while providing essential functionality to help users avoid unexpected battery depletion.
+

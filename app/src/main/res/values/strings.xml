@@ -1,0 +1,77 @@
+<resources>
+    <!-- App Identification -->
+    <string name="app_name">Battery Monitor</string>
+    <string name="app_description">Monitor your battery levels and get timely alerts</string>
+    <string name="app_footer">Battery Monitor © 2025 - Lightweight Battery Management</string>
+    
+    <!-- Battery Status Labels -->
+    <string name="battery_level_display">Battery Level: %1$d%%</string>
+    <string name="battery_charging">Charging</string>
+    <string name="battery_discharging">Discharging</string>
+    <string name="battery_full">Fully Charged</string>
+    <string name="battery_low">Low Battery</string>
+    <string name="battery_critical">Critical Battery</string>
+    
+    <!-- UI Elements -->
+    <string name="enable_monitoring">Enable Battery Monitoring</string>
+    <string name="monitoring_settings">Monitoring Settings</string>
+    <string name="alert_thresholds">Alert Thresholds</string>
+    <string name="status_idle">Status: Idle - No monitoring active</string>
+    <string name="status_monitoring">Status: Actively monitoring battery</string>
+    <string name="status_charging">Status: Charging - Alerts paused</string>
+    
+    <!-- Alert Threshold Descriptions -->
+    <string name="level_50_label">50% Level:</string>
+    <string name="level_40_label">40% Level:</string>
+    <string name="level_30_label">30% Level:</string>
+    <string name="level_50_description">Alert every 5 minutes</string>
+    <string name="level_40_description">Alert every 3 minutes</string>
+    <string name="level_30_description">Alert every 2 minutes</string>
+    
+    <!-- Notification Channel -->
+    <string name="notification_channel_name">Battery Alerts</string>
+    <string name="notification_channel_description">Alerts when battery level is low</string>
+    
+    <!-- Notification Content -->
+    <string name="notification_title">Battery Monitor Active</string>
+    <string name="notification_text">Monitoring battery level: %1$d%%</string>
+    <string name="warning_battery_low">Warning: Battery level is at %1$d%%</string>
+    <string name="plugin_reminder">Please plug in your device</string>
+    
+    <!-- Alert Messages -->
+    <string name="alert_title">Battery Alert</string>
+    <string name="alert_message_50">Battery at 50%. Consider charging soon.</string>
+    <string name="alert_message_40">Battery at 40%. Please find a charger.</string>
+    <string name="alert_message_30">Battery at 30%. Charge immediately!</string>
+    
+    <!-- Toast Messages -->
+    <string name="toast_monitoring_enabled">Battery monitoring enabled</string>
+    <string name="toast_monitoring_disabled">Battery monitoring disabled</string>
+    
+    <!-- Error Messages -->
+    <string name="error_service_start">Failed to start monitoring service</string>
+    <string name="error_battery_read">Failed to read battery information</string>
+    
+    <!-- Boot Receiver Messages -->
+    <string name="boot_monitoring_restored">Battery monitoring restored after restart</string>
+    
+    <!-- Menu Items -->
+    <string name="menu_help">Help</string>
+    <string name="menu_about">About</string>
+    
+    <!-- About Screen -->
+    <string name="about_title">About Battery Monitor</string>
+    <string name="about_version">Version 0.01</string>
+    <string name="about_description">Battery Monitor helps you keep track of your battery level and alerts you when it\'s time to recharge.</string>
+    <string name="about_copyright">© 2025 - All rights reserved</string>
+    <string name="about_developer">Developed as a lightweight solution for battery management</string>
+    
+    <!-- Help Screen -->
+    <string name="help_title">Battery Monitor Help</string>
+    <string name="help_monitoring_header">Battery Monitoring</string>
+    <string name="help_monitoring_text">Toggle the switch on the main screen to enable battery monitoring. The app will run in the background and alert you when your battery reaches critical levels.</string>
+    <string name="help_alerts_header">Alert Thresholds</string>
+    <string name="help_alerts_text" formatted="false">• 50% Battery: Alerts every 5 minutes\n• 40% Battery: Alerts every 3 minutes\n• 30% Battery: Alerts every 2 minutes</string>
+    <string name="help_tips_header">Battery Tips</string>
+    <string name="help_tips_text">• Keep your phone charged between 20% and 80% when possible\n• Avoid using your phone while charging\n• Close unused apps to save battery life</string>
+</resources>
