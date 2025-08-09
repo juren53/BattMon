@@ -31,7 +31,7 @@ import datetime
 
 ACPI_CMD = 'acpi'
 TIMEOUT = 2
-VERSION = '0.1'
+VERSION = '0.1.0'
 config = False
 config_path = os.path.expanduser('~/.battmon')
 
