@@ -27,9 +27,11 @@ import subprocess
 import os
 import sys
 import configparser
+import datetime
 
 ACPI_CMD = 'acpi'
 TIMEOUT = 2
+VERSION = '0.1'
 config = False
 config_path = os.path.expanduser('~/.battmon')
 
@@ -91,6 +93,11 @@ if config:
             # Separator
             menu.append(Gtk.SeparatorMenuItem())
             
+            # About item
+            about_item = Gtk.MenuItem(label="About BattMon")
+            about_item.connect('activate', self.show_about)
+            menu.append(about_item)
+            
             # Quit item
             quit_item = Gtk.MenuItem(label="Quit")
             quit_item.connect('activate', self.quit_app)
@@ -98,6 +105,50 @@ if config:
             
             menu.show_all()
             menu.popup(None, None, None, None, button, time)
+        
+        def show_about(self, widget):
+            """Show about dialog with version and update information"""
+            try:
+                # Get file modification time
+                script_path = os.path.abspath(__file__)
+                mtime = os.path.getmtime(script_path)
+                update_date = datetime.datetime.fromtimestamp(mtime).strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Create about dialog
+                dialog = Gtk.MessageDialog(
+                    parent=None,
+                    flags=0,
+                    message_type=Gtk.MessageType.INFO,
+                    buttons=Gtk.ButtonsType.OK,
+                    text="About BattMon PC"
+                )
+                
+                about_text = f"""BattMon PC - Battery Monitor for Linux
+
+Version: {VERSION}
+Last Updated: {update_date}
+
+A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a highly readable rectangular battery icon design.
+
+Features:
+• Ultra-readable battery percentage display
+• Color-coded battery levels (Red/Orange/Green)
+• Prominent charging indicator
+• Interactive notifications and tooltips
+• Lightweight with minimal resource usage
+
+Developed with Python 3 + GTK3
+License: GPL v2+"""
+                
+                dialog.format_secondary_text(about_text)
+                dialog.set_title("About BattMon")
+                
+                # Show dialog and handle response
+                response = dialog.run()
+                dialog.destroy()
+                
+            except Exception as e:
+                print(f"Error showing about dialog: {e}")
         
         def quit_app(self, widget):
             print("BattMon shutting down...")

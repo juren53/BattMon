@@ -14,7 +14,8 @@ A modern Python 3 battery monitoring application that displays battery percentag
 
 ### 🖱️ Interactive Features
 - **Left-click**: Show detailed battery notification
-- **Right-click**: Context menu with battery info and quit option
+- **Right-click**: Context menu with battery info, about dialog, and quit option
+- **About dialog**: Version information and last update timestamp
 - **Tooltip**: Hover for current battery status and time remaining
 - **Smart notifications**: Only shows console output for significant changes (5% or state changes)
 
