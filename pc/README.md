@@ -1,14 +1,15 @@
 # BattMon PC - Battery Monitor for Linux
 
-A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a clean, highly readable circular icon design.
+A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a clean, highly readable rectangular battery icon design.
 
 ## Features
 
 ### 🔋 Ultra-Readable Battery Display
-- **Large percentage numbers** (font size 11-15px) displayed directly in system tray
-- **Color-coded circular background**: Red (0-25%), Orange (26-75%), Green (76-100%)
+- **Large percentage numbers** (font size 9-13px) displayed directly in system tray
+- **Rectangular battery shape** with terminal for realistic appearance
+- **Color-coded background**: Red (0-25%), Orange (26-75%), Green (76-100%)
 - **High contrast design**: White text with thick black outline on colored background
-- **Charging indicator**: Yellow lightning bolt when plugged in
+- **Prominent charging indicator**: Bright yellow lightning bolt with white outline when plugged in
 - **Works on any theme**: Light, dark, or custom system tray themes
 
 ### 🖱️ Interactive Features
@@ -100,15 +101,15 @@ charge_icon = battery-level-20-charging-symbolic
 ## Design Philosophy
 
 ### Ultra-Readable Design:
-1. **Simple Circular Design**: Clean, modern appearance that stands out in any system tray
-2. **Massive Text Improvements**: Font size 11-15 (nearly double typical sizes) with bold white text
-3. **Maximum Contrast**: White text with thick 4-pixel black outline on colored background
+1. **Rectangular Battery Shape**: Realistic battery appearance with terminal, stands out in any system tray
+2. **Massive Text Improvements**: Font size 9-13 (large and clear) with bold white text
+3. **Maximum Contrast**: White text with thick 3-pixel black outline on colored background
 4. **Smart Text Positioning**: Adaptive sizing and centering based on digit count (5 vs 50 vs 100)
-5. **Clear Charging Indicator**: Yellow lightning bolt that doesn't interfere with percentage text
+5. **Prominent Charging Indicator**: Bright yellow lightning bolt with white outline positioned above battery for maximum visibility
 
 ### Visual Result:
 - **Instantly readable** percentage at any distance
-- **Professional appearance** with clean circular design
+- **Professional appearance** with clean rectangular battery design
 - **Works universally** across all desktop themes and environments
 
 ## Troubleshooting
@@ -128,7 +129,7 @@ charge_icon = battery-level-20-charging-symbolic
 
 ## Development
 
-Converted from Python 2 to Python 3 with modern GTK3 integration. The original battery shape design was replaced with a circular design optimized for maximum text readability.
+Converted from Python 2 to Python 3 with modern GTK3 integration. The original design was evolved into a rectangular battery shape optimized for maximum text readability and realistic battery appearance.
 
 ### Key Components:
 - **MainApp class**: Core application logic and GTK integration

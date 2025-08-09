@@ -140,7 +140,7 @@ if config:
             return icon
 
         def create_battery_icon_with_text(self, percentage, is_charging=False):
-            """Create a custom icon with battery percentage text"""
+            """Create a custom rectangular battery icon with percentage text"""
             # Create a 24x24 surface for the icon
             surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 24, 24)
             ctx = cairo.Context(surface)
@@ -158,52 +158,79 @@ if config:
             else:
                 bg_color = (0.8, 0.2, 0.2)  # Red
             
-            # Draw solid colored background circle
+            # Draw rectangular battery body
+            battery_x, battery_y = 2, 8
+            battery_width, battery_height = 18, 8
+            
+            # Fill battery background with color
             ctx.set_source_rgba(bg_color[0], bg_color[1], bg_color[2], 1.0)
-            ctx.arc(12, 12, 11, 0, 2 * 3.14159)  # Circle centered at 12,12 with radius 11
+            ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
             ctx.fill()
             
-            # Draw border around circle
-            ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black border
+            # Draw battery outline
+            ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black outline
             ctx.set_line_width(2)
-            ctx.arc(12, 12, 11, 0, 2 * 3.14159)
+            ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
             ctx.stroke()
             
-            # Add charging indicator if charging
+            # Draw battery terminal (positive end)
+            terminal_x = battery_x + battery_width
+            terminal_y = battery_y + 2
+            terminal_width, terminal_height = 2, 4
+            
+            ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black terminal
+            ctx.rectangle(terminal_x, terminal_y, terminal_width, terminal_height)
+            ctx.fill()
+            
+            # Add charging indicator if charging - make it more visible
             if is_charging:
-                ctx.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # Yellow lightning
-                ctx.set_line_width(2)
-                # Simple lightning bolt in top-right
-                ctx.move_to(17, 6)
-                ctx.line_to(19, 10)
-                ctx.line_to(17, 10)
-                ctx.line_to(19, 14)
-                ctx.line_to(15, 10)
-                ctx.line_to(17, 10)
+                # Draw a prominent lightning bolt in the center-top area
+                ctx.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # Bright yellow lightning
+                ctx.set_line_width(1)
+                
+                # Larger, more visible lightning bolt
+                ctx.move_to(10, 4)   # Start higher up
+                ctx.line_to(14, 7)   # Down to right
+                ctx.line_to(12, 7)   # Left point
+                ctx.line_to(16, 10)  # Down to far right
+                ctx.line_to(12, 7)   # Back to center
+                ctx.line_to(14, 7)   # Right point
                 ctx.close_path()
                 ctx.fill()
+                
+                # Add a white outline to make it stand out more
+                ctx.move_to(10, 4)
+                ctx.line_to(14, 7)
+                ctx.line_to(12, 7)
+                ctx.line_to(16, 10)
+                ctx.line_to(12, 7)
+                ctx.line_to(14, 7)
+                ctx.close_path()
+                ctx.set_source_rgba(1.0, 1.0, 1.0, 1.0)  # White outline
+                ctx.set_line_width(2)
+                ctx.stroke()
             
             # Prepare large, bold text
             text = f"{percentage}"
             ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
             
-            # Use much larger font and center the text
+            # Position text in the lower part of the icon
             if percentage == 100:
-                ctx.set_font_size(11)
-                text_x, text_y = 2, 17
+                ctx.set_font_size(9)
+                text_x, text_y = 3, 22
             elif percentage >= 10:
-                ctx.set_font_size(13)
-                text_x, text_y = 5, 17
+                ctx.set_font_size(11)
+                text_x, text_y = 6, 22
             else:
-                ctx.set_font_size(15)
-                text_x, text_y = 8, 18
+                ctx.set_font_size(13)
+                text_x, text_y = 9, 22
             
             # Draw white text with thick black outline for maximum contrast
             ctx.move_to(text_x, text_y)
             ctx.text_path(text)
             
             # Thick black outline
-            ctx.set_line_width(4)
+            ctx.set_line_width(3)
             ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black outline
             ctx.stroke_preserve()
             
