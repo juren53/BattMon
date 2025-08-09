@@ -7,7 +7,7 @@ New Ultra-Readable Design:
 1. Simple Circular Design:
 •  Solid colored circle instead of complex battery shape
 •  Clean, modern appearance that stands out in any system tray
-2. Massive Text Improvements:
+2. Text Improvements:
 •  Font size 11-15 (was 6-9) - nearly double the size!
 •  Bold white text with thick 4-pixel black outline
 •  Maximum contrast - white on colored background with black border
