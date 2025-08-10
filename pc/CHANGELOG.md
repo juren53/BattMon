@@ -5,6 +5,53 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-08-10
+
+### Added - Cross-Platform Mainstream Release 🚀
+- **battmon.py**: The cross-platform proof-of-concept (`bm_x.py`) is now the official mainstream application
+  - Single unified codebase supporting Linux, Windows, and macOS
+  - Automatic OS detection with platform-specific battery information retrieval
+  - Native system integration across all supported platforms
+  - Maintains all advanced features: pulsing animations, color-coding, and enhanced UI
+
+### Platform Support
+- **Linux**: Uses `acpi` command for battery information (existing functionality)
+- **Windows**: WMI-based battery monitoring with PowerShell fallback
+- **macOS**: Uses `pmset` command for battery status retrieval
+- **Cross-Platform UI**: Qt6-based interface with native OS styling
+
+### Technical Architecture
+- **Unified Battery Interface**: Abstract battery information handling across platforms
+- **Smart OS Detection**: Automatic platform identification and appropriate method selection
+- **Robust Fallbacks**: Multiple battery information sources per platform for reliability
+- **Consistent User Experience**: Same UI behavior, animations, and features across all platforms
+
+### Migration
+- **Renamed**: `bm_x.py` → `battmon.py` (now the primary application)
+- **Backward Compatibility**: All existing features and configurations preserved
+- **Enhanced Cross-Platform**: Ready for Windows 11 and macOS deployment
+
+### Installation
+```bash
+# Linux (unchanged)
+sudo apt install python3 python3-pip acpi
+pip install PyQt6
+
+# Windows
+pip install PyQt6 wmi
+
+# macOS
+brew install python3
+pip install PyQt6
+```
+
+### Key Benefits
+- ✅ **True Cross-Platform**: Single codebase, multiple OS support
+- ✅ **Native Integration**: Platform-specific battery APIs and UI styling
+- ✅ **Enhanced Reliability**: Multiple fallback mechanisms per platform
+- ✅ **Future-Proof**: Built on modern Qt6 framework
+- ✅ **Easy Deployment**: Simplified distribution across platforms
+
 ## [0.4.0] - 2025-08-10
 
 ### Added - Major Qt6 Release 🎉
