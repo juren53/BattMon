@@ -1,4 +1,4 @@
-# BattMon PC - Battery Monitor for Linux
+# BattMon PC - Battery Monitor for Linux, PCs and Macs
 
 A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a clean, highly readable rectangular battery icon design.
 
