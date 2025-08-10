@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.0 - A Qt6-based cross-platform version with OS detection
+Version 0.5.1 - A Qt6-based cross-platform version with OS detection
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.0'
+VERSION = '0.5.1'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -623,13 +623,13 @@ License: GPL v2+</p>"""
             color = QColor(244, 67, 54)   # Red (29-0%)
             bg_color = QColor(255, 200, 200, 180)  # Light red background
         
-        # Use more of the available space - make battery larger and move it up
+        # Use more of the available space - make battery larger and move it higher up
         battery_x = int(1 * scale)
-        battery_y = int(6 * scale)  # Move up to use upper space
+        battery_y = int(2 * scale)  # Move higher up to use more top space
         battery_width = int(20 * scale)  # Make wider
-        battery_height = int(10 * scale)  # Make taller
+        battery_height = int(12 * scale)  # Make even taller
         terminal_width = int(2 * scale)
-        terminal_height = int(6 * scale)  # Make terminal taller too
+        terminal_height = int(8 * scale)  # Make terminal taller to match
         
         # Add a subtle background color fill in upper area to reinforce color coding
         if size >= 20:  # Only for larger icons
@@ -659,7 +659,7 @@ License: GPL v2+</p>"""
         
         # Draw battery terminal (positive end)
         terminal_x = battery_x + battery_width
-        terminal_y = battery_y + int(2 * scale)
+        terminal_y = battery_y + int(2 * scale)  # Adjust for taller battery
         painter.setBrush(QBrush(Qt.GlobalColor.black))
         painter.setPen(QPen(Qt.GlobalColor.transparent))
         painter.drawRect(terminal_x, terminal_y, terminal_width, terminal_height)

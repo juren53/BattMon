@@ -5,6 +5,28 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2025-08-10
+
+### Enhanced - Icon Space Utilization 🎨
+- **Improved Battery Icon Layout**: Enhanced system tray icon design for better space utilization
+  - Moved battery graphic higher up in the icon field to occupy previously empty top space
+  - Increased battery height from 10 to 12 scale units for more prominent display
+  - Adjusted battery positioning from 6 to 2 scale units from top for better visual balance
+  - Enhanced terminal height to match the taller battery design
+  - Maintained percentage text positioning in lower portion for optimal readability
+  - Preserved all existing features: color coding, pulsing animations, and charging indicators
+
+### Visual Improvements
+- **Better Icon Prominence**: Battery graphic now uses more of the available icon space
+- **Enhanced Readability**: Larger, more visible battery representation in system tray
+- **Optimized Layout**: Better distribution of visual elements within the 24x24 pixel icon field
+- **Consistent Functionality**: All existing animations, colors, and indicators work seamlessly with new layout
+
+### Technical Details
+- Updated `create_battery_icon()` method with improved positioning calculations
+- Refined battery dimensions and terminal positioning for visual consistency
+- Maintained backward compatibility with all existing features and configurations
+
 ## [0.5.0] - 2025-08-10
 
 ### Added - Cross-Platform Mainstream Release 🚀
