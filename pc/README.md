@@ -103,7 +103,7 @@ charge_icon = battery-level-20-charging-symbolic
 
 ### Ultra-Readable Design:
 1. **Rectangular Battery Shape**: Realistic battery appearance with terminal, stands out in any system tray
-2. **Massive Text Improvements**: Font size 9-13 (large and clear) with bold white text
+2. **Text Improvements**: Font size 9-13 (large and clear) with bold white text
 3. **Maximum Contrast**: White text with thick 3-pixel black outline on colored background
 4. **Smart Text Positioning**: Adaptive sizing and centering based on digit count (5 vs 50 vs 100)
 5. **Prominent Charging Indicator**: Bright yellow lightning bolt with white outline positioned above battery for maximum visibility
