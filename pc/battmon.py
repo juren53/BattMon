@@ -19,9 +19,10 @@
 
 import gi
 gi.require_version('Gtk', '3.0')
+gi.require_version('Gdk', '3.0')
 gi.require_version('GdkPixbuf', '2.0')
 gi.require_version('PangoCairo', '1.0')
-from gi.repository import Gtk, GLib, GdkPixbuf, Pango, PangoCairo
+from gi.repository import Gtk, Gdk, GLib, GdkPixbuf, Pango, PangoCairo
 import cairo
 import subprocess
 import os
@@ -31,7 +32,7 @@ import datetime
 
 ACPI_CMD = 'acpi'
 TIMEOUT = 2
-VERSION = '0.1.0'
+VERSION = '0.3.0'
 config = False
 config_path = os.path.expanduser('~/.battmon')
 
@@ -190,76 +191,139 @@ License: GPL v2+"""
                     icon['state'] = 'icon' if state == 'Discharging' else 'charge_icon'
             return icon
 
+        def load_base_icon(self, icon_path):
+            """Load a base icon template from file"""
+            try:
+                if os.path.exists(icon_path):
+                    pixbuf = GdkPixbuf.Pixbuf.new_from_file(icon_path)
+                    # Convert pixbuf to cairo surface
+                    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 
+                                                pixbuf.get_width(), 
+                                                pixbuf.get_height())
+                    ctx = cairo.Context(surface)
+                    Gdk.cairo_set_source_pixbuf(ctx, pixbuf, 0, 0)
+                    ctx.paint()
+                    return surface
+            except Exception as e:
+                print(f"Could not load base icon {icon_path}: {e}")
+            return None
+        
         def create_battery_icon_with_text(self, percentage, is_charging=False):
             """Create a custom rectangular battery icon with percentage text"""
-            # Create a 24x24 surface for the icon
-            surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 24, 24)
+            # Try to load custom base icon first (but handle failures gracefully)
+            surface = None
+            base_icon_path = "battery_base.png"
+            
+            if os.path.exists(base_icon_path):
+                try:
+                    surface = self.load_base_icon(base_icon_path)
+                    if surface:
+                        print(f"Using custom base icon: {base_icon_path}")
+                except Exception as e:
+                    print(f"Warning: Could not use custom base icon: {e}")
+                    surface = None
+            
+            # Always create programmatically if no custom icon loaded successfully
+            if surface is None:
+                surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 24, 24)
+            
             ctx = cairo.Context(surface)
             
-            # Set background to transparent
-            ctx.set_operator(cairo.OPERATOR_CLEAR)
-            ctx.paint()
-            ctx.set_operator(cairo.OPERATOR_OVER)
+            # Create programmatically if no custom icon loaded or we have a fresh 24x24 surface
+            create_programmatically = (surface.get_width() == 24 and surface.get_height() == 24 and 
+                                     (not os.path.exists(base_icon_path) or surface is None))
             
-            # Choose background color based on battery level
-            if percentage > 75:
-                bg_color = (0.2, 0.7, 0.2)  # Green
-            elif percentage > 25:
-                bg_color = (0.8, 0.6, 0.0)  # Orange
-            else:
-                bg_color = (0.8, 0.2, 0.2)  # Red
-            
-            # Draw rectangular battery body
-            battery_x, battery_y = 2, 8
-            battery_width, battery_height = 18, 8
-            
-            # Fill battery background with color
-            ctx.set_source_rgba(bg_color[0], bg_color[1], bg_color[2], 1.0)
-            ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
-            ctx.fill()
-            
-            # Draw battery outline
-            ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black outline
-            ctx.set_line_width(2)
-            ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
-            ctx.stroke()
-            
-            # Draw battery terminal (positive end)
-            terminal_x = battery_x + battery_width
-            terminal_y = battery_y + 2
-            terminal_width, terminal_height = 2, 4
-            
-            ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black terminal
-            ctx.rectangle(terminal_x, terminal_y, terminal_width, terminal_height)
-            ctx.fill()
-            
-            # Add charging indicator if charging - make it more visible
-            if is_charging:
-                # Draw a prominent lightning bolt in the center-top area
-                ctx.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # Bright yellow lightning
-                ctx.set_line_width(1)
+            if create_programmatically:
+                # Set background to transparent
+                ctx.set_operator(cairo.OPERATOR_CLEAR)
+                ctx.paint()
+                ctx.set_operator(cairo.OPERATOR_OVER)
                 
-                # Larger, more visible lightning bolt
-                ctx.move_to(10, 4)   # Start higher up
-                ctx.line_to(14, 7)   # Down to right
-                ctx.line_to(12, 7)   # Left point
-                ctx.line_to(16, 10)  # Down to far right
-                ctx.line_to(12, 7)   # Back to center
-                ctx.line_to(14, 7)   # Right point
-                ctx.close_path()
+                # Choose background color based on battery level
+                if percentage > 75:
+                    bg_color = (0.2, 0.7, 0.2)  # Green
+                elif percentage > 25:
+                    bg_color = (0.8, 0.6, 0.0)  # Orange
+                else:
+                    bg_color = (0.8, 0.2, 0.2)  # Red
+                
+                # Draw rectangular battery body
+                battery_x, battery_y = 2, 8
+                battery_width, battery_height = 18, 8
+                
+                # Fill battery background with color
+                ctx.set_source_rgba(bg_color[0], bg_color[1], bg_color[2], 1.0)
+                ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
                 ctx.fill()
                 
-                # Add a white outline to make it stand out more
-                ctx.move_to(10, 4)
-                ctx.line_to(14, 7)
-                ctx.line_to(12, 7)
-                ctx.line_to(16, 10)
-                ctx.line_to(12, 7)
-                ctx.line_to(14, 7)
-                ctx.close_path()
-                ctx.set_source_rgba(1.0, 1.0, 1.0, 1.0)  # White outline
+                # Draw battery outline
+                ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black outline
                 ctx.set_line_width(2)
+                ctx.rectangle(battery_x, battery_y, battery_width, battery_height)
                 ctx.stroke()
+                
+                # Draw battery terminal (positive end)
+                terminal_x = battery_x + battery_width
+                terminal_y = battery_y + 2
+                terminal_width, terminal_height = 2, 4
+                
+                ctx.set_source_rgba(0.0, 0.0, 0.0, 1.0)  # Black terminal
+                ctx.rectangle(terminal_x, terminal_y, terminal_width, terminal_height)
+                ctx.fill()
+            else:
+                # If using custom base icon, add battery level fill
+                if percentage > 75:
+                    bg_color = (0.2, 0.7, 0.2)  # Green
+                elif percentage > 25:
+                    bg_color = (0.8, 0.6, 0.0)  # Orange
+                else:
+                    bg_color = (0.8, 0.2, 0.2)  # Red
+                
+                # Fill battery level (assuming battery area is 2,8 to 20,16)
+                battery_x, battery_y = 2, 8
+                battery_width, battery_height = 18, 8
+                fill_width = int((battery_width * percentage) / 100)
+                
+                ctx.set_source_rgba(bg_color[0], bg_color[1], bg_color[2], 0.7)
+                ctx.rectangle(battery_x, battery_y, fill_width, battery_height)
+                ctx.fill()
+            
+            # Add charging indicator if charging
+            if is_charging:
+                # Try to load custom charging indicator first
+                charging_icon_path = "charging_indicator.png"
+                charging_surface = self.load_base_icon(charging_icon_path)
+                
+                if charging_surface:
+                    # Overlay the charging indicator
+                    ctx.set_source_surface(charging_surface, 0, 0)
+                    ctx.paint()
+                else:
+                    # Fallback to drawing lightning bolt programmatically
+                    ctx.set_source_rgba(1.0, 1.0, 0.0, 1.0)  # Bright yellow lightning
+                    ctx.set_line_width(1)
+                    
+                    # Larger, more visible lightning bolt
+                    ctx.move_to(10, 4)   # Start higher up
+                    ctx.line_to(14, 7)   # Down to right
+                    ctx.line_to(12, 7)   # Left point
+                    ctx.line_to(16, 10)  # Down to far right
+                    ctx.line_to(12, 7)   # Back to center
+                    ctx.line_to(14, 7)   # Right point
+                    ctx.close_path()
+                    ctx.fill()
+                    
+                    # Add a white outline to make it stand out more
+                    ctx.move_to(10, 4)
+                    ctx.line_to(14, 7)
+                    ctx.line_to(12, 7)
+                    ctx.line_to(16, 10)
+                    ctx.line_to(12, 7)
+                    ctx.line_to(14, 7)
+                    ctx.close_path()
+                    ctx.set_source_rgba(1.0, 1.0, 1.0, 1.0)  # White outline
+                    ctx.set_line_width(2)
+                    ctx.stroke()
             
             # Prepare large, bold text
             text = f"{percentage}"
@@ -332,16 +396,9 @@ License: GPL v2+"""
                     print(f"Battery: {percentage}% {info['state']}")
             except Exception as e:
                 print(f"Failed to create custom icon: {e}")
-                # Fallback to regular icon method
-                icon = self.get_icon(info['state'], percentage)
-                icon_name = icon[icon['state']]
-                try:
-                    self.icon.set_from_icon_name(icon_name)
-                    if show_message:
-                        print(f"Battery: {percentage}% {info['state']} - Using fallback icon: {icon_name}")
-                except:
-                    self.icon.set_from_stock(Gtk.STOCK_DIALOG_WARNING)
-                    print("Using stock warning icon as last resort")
+                print("BattMon will continue running, but icons may not display properly.")
+                # Skip icon fallbacks that might also fail due to PNG loading issues
+                # The application will continue to work for notifications and functionality
             
             # Set tooltip with battery info
             tooltip = f"Battery: {percentage}% ({info['state']})"

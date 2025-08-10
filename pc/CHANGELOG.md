@@ -5,6 +5,92 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-08-10
+
+### Fixed
+- **Critical GdkPixbuf PNG Loading Issues**: Resolved crashes caused by missing PNG loaders on some Linux distributions
+  - Added robust error handling for custom PNG icon loading failures
+  - Implemented graceful fallback to programmatic icon generation when PNG files can't be loaded
+  - Removed problematic system icon fallbacks that could cause crashes
+  - Application now continues running even if custom icons fail to load
+
+### Enhanced
+- **Improved Stability**: Better exception handling throughout the icon creation pipeline
+- **User Feedback**: Clear warning messages when custom icons can't be loaded
+- **Resilience**: Application no longer crashes due to image format recognition issues
+- **Compatibility**: Works on LMDE and other distributions with incomplete GdkPixbuf configurations
+
+### Technical Improvements
+- Enhanced `create_battery_icon_with_text()` with better error handling
+- Improved PNG loading logic with try/catch blocks
+- Removed system icon theme dependencies that could trigger PNG loading failures
+- Better detection of when to create icons programmatically vs. using templates
+
+### User Experience
+- **No More Crashes**: Application runs reliably even on systems with PNG loading issues
+- **Continued Functionality**: All battery monitoring features work regardless of custom icon support
+- **Clear Messages**: Users are informed when custom icons can't be used, but application continues normally
+
+### Known Issues Resolved
+- Fixed "gdk-pixbuf-error-quark: Couldn't recognize the image file format" crashes
+- Fixed "Failed to load image-missing.png" system icon fallback crashes
+- Resolved core dumps on systems with incomplete GdkPixbuf PNG support
+
+## [0.2.0] - 2025-08-10
+
+### Added
+- **Custom Icon System**: Complete support for user-created battery icon templates
+  - `battery_base.png` - Customizable base battery shape/outline
+  - `charging_indicator.png` - Customizable charging symbol overlay
+  - Automatic detection and loading of custom PNG icons (24x24 pixels)
+  - Graceful fallback to programmatic generation if custom icons unavailable
+  - Smart blending: custom base + dynamic color fill + percentage text + charging overlay
+
+### New Tools and Scripts
+- `create_base_icon.py` - Generates default icon templates for customization
+- `test_custom_icons.py` - Comprehensive test suite for custom icon functionality
+- `setup_custom_icons.sh` - One-click setup script with dependency checking
+- `CUSTOM_ICONS.md` - Complete documentation for custom icon creation
+
+### Enhanced Features
+- **Icon Template Support**: Load PNG templates and apply dynamic modifications
+- **Improved Error Handling**: Better exception handling for icon loading failures
+- **Extended GTK Integration**: Added Gdk support for pixbuf-to-cairo conversion
+- **Visual Testing**: Test result generation (`test_result.png`) to preview icon combinations
+
+### Technical Improvements
+- Added `load_base_icon()` method for PNG template loading
+- Enhanced `create_battery_icon_with_text()` with template support
+- Improved Cairo surface handling and memory management
+- Better separation of concerns between icon generation and template loading
+- Added comprehensive dependency checking and validation
+
+### User Experience
+- **Easy Customization**: Users can now edit battery icons with any image editor (GIMP, Photoshop, etc.)
+- **Maintained Functionality**: All dynamic features preserved (color-coding, percentage, charging indicators)
+- **Quick Setup**: Single command setup with automatic template generation
+- **Visual Feedback**: Test scripts show exactly how custom icons will look
+
+### Documentation
+- Complete custom icon workflow documentation
+- Advanced customization examples (multiple battery designs, custom charging indicators)
+- Troubleshooting guide for common icon issues
+- Fallback behavior explanation
+
+### Dependencies (Updated)
+- Python 3.x
+- GTK 3 with GObject Introspection
+- **Gdk 3** (newly required for pixbuf conversion)
+- GdkPixbuf 2.0 (for PNG loading)
+- Cairo graphics library
+- ACPI utilities (`acpi` command)
+- Linux with system tray support
+
+### Installation Requirements (Updated)
+```bash
+sudo apt install python3 python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-gdk-3.0 gir1.2-gdkpixbuf-2.0 acpi
+```
+
 ## [0.1.0] - 2025-08-09
 
 ### Added
