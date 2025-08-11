@@ -326,9 +326,11 @@ class BattMonCrossPlatform(QWidget):
     
     def show_about(self):
         """Show about dialog"""
+        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         about_text = f"""<h2>BattMon Cross-Platform - Battery Monitor</h2>
 
 <p><b>Version:</b> {VERSION}<br>
+<b>Build Date:</b> {current_time}<br>
 <b>Qt Version:</b> {QApplication.instance().applicationVersion()}<br>
 <b>Framework:</b> PyQt6<br>
 <b>Platform:</b> {CURRENT_OS} ({platform.platform()})</p>
