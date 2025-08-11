@@ -5,6 +5,60 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] - 2025-08-11 12:53:00 CDT
+
+### Added - Audio Alert System 🔊
+- **Cross-Platform Audio Beeps**: Synchronized audio alerts with pulsing visual animations
+  - Beeps trigger when pulsing icons reach maximum opacity (peak visibility)
+  - Audio feedback for low battery warnings enhances accessibility
+  - Short, non-intrusive 0.1-0.15 second beeps at 800 Hz frequency
+  - Automatic beep timing matches visual pulse cycles
+
+### Platform-Specific Audio Implementation
+- **Windows**: Uses built-in `winsound.Beep()` module for reliable system beeps
+  - No external dependencies required
+  - Native Windows audio API integration
+  - 150ms beep duration at 800 Hz frequency
+- **Linux/macOS**: Uses `sox` (`play` command) for high-quality audio generation
+  - 0.1 second sine wave beeps at 800 Hz
+  - Leverages existing sox dependency from beep timer functionality
+  - Graceful fallback to silent operation if sox unavailable
+
+### Audio Alert Behavior
+- **Battery < 30%** (Critical/Red): Fast audio beeps every 300ms with pulsing
+- **Battery 30-50%** (Warning/Orange): Slower audio beeps every 600ms with pulsing  
+- **Battery > 50%** (Normal/Yellow-Green): No audio alerts or pulsing
+- **Charging State**: Audio alerts automatically disabled regardless of battery level
+- **Toggle Control**: Built-in `beep_with_pulse` flag for easy enable/disable
+
+### Enhanced User Experience
+- **Multi-Modal Alerts**: Combines visual pulsing with synchronized audio feedback
+- **Accessibility Improvement**: Audio cues help users notice low battery warnings
+- **Non-Intrusive Design**: Short beep duration prevents audio annoyance
+- **Smart Timing**: Beeps only at pulse peaks for maximum effectiveness
+- **Battery State Awareness**: Respects charging status to avoid unnecessary alerts
+
+### Technical Improvements
+- Added cross-platform `beep()` method with OS-specific implementations
+- Enhanced `pulse_update()` method to trigger audio at optimal timing
+- Integrated audio functionality without affecting existing pulse animation logic
+- Maintained backward compatibility with all existing features
+- Zero additional dependencies for Windows users
+
+### Development Tools
+- **beep_timer.py**: Cross-platform beep testing utility created during development
+  - Standalone audio testing for both Linux (sox) and Windows (winsound)
+  - 5-second interval beeping for audio system verification
+  - Serves as reference implementation for audio functionality
+
+### Key Benefits
+- ✅ **Enhanced Accessibility**: Audio alerts complement visual notifications
+- ✅ **Cross-Platform Consistency**: Unified beep behavior across all supported OS
+- ✅ **Smart Integration**: Audio synchronized with existing pulse animations
+- ✅ **Resource Efficient**: Minimal CPU usage with short beep duration
+- ✅ **User Controlled**: Easy to disable via configuration flag
+- ✅ **Battery Aware**: Respects charging state and battery level thresholds
+
 ## [0.5.1] - 2025-08-11 07:30:00 CDT
 
 ### Enhanced - Icon Space Utilization 🎨

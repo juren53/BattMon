@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.1 - A Qt6-based cross-platform version with OS detection
+Version 0.5.2 - A Qt6-based cross-platform version with audio alerts
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.1'
+VERSION = '0.5.2'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -251,6 +251,7 @@ class BattMonCrossPlatform(QWidget):
         self.pulse_opacity = 1.0
         self.pulse_direction = -0.3  # Fade direction and speed
         self.pulse_timer = None
+        self.beep_with_pulse = True  # Enable/disable beeps with pulsing
         
         # Create system tray icon
         self.tray_icon = QSystemTrayIcon(self)
@@ -580,18 +581,57 @@ License: GPL v2+</p>"""
             self.pulse_timer = None
         self.pulse_opacity = 1.0
         
+    def beep(self):
+        """Make a beep sound using platform-appropriate methods."""
+        if not self.beep_with_pulse:
+            return
+            
+        system = platform.system().lower()
+        
+        if system == 'windows':
+            try:
+                # Method 1: Use winsound module (built into Python on Windows)
+                import winsound
+                # Play a beep at 800 Hz for 150ms (shorter for pulse beeps)
+                winsound.Beep(800, 150)
+                return
+            except ImportError:
+                pass
+            
+            try:
+                # Method 2: Use os.system with Windows beep command
+                import os
+                os.system('echo \a')
+                return
+            except:
+                pass
+        
+        elif system == 'linux' or system == 'darwin':  # Linux or macOS
+            try:
+                # Use sox if available - shorter beep for pulsing
+                import subprocess
+                subprocess.run(['play', '-n', 'synth', '0.1', 'sine', '800'], 
+                              capture_output=True, check=True, timeout=2)
+                return
+            except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError):
+                pass
+        
+        # Fallback: silent (no beep)
+        
     def pulse_update(self):
         """Update pulse animation state"""
         # Update opacity for pulsing effect
         self.pulse_opacity += self.pulse_direction
         
-        # Reverse direction at boundaries
+        # Reverse direction at boundaries and play beep
         if self.pulse_opacity <= 0.3:
             self.pulse_opacity = 0.3
             self.pulse_direction = 0.3  # Fade in
         elif self.pulse_opacity >= 1.0:
             self.pulse_opacity = 1.0
             self.pulse_direction = -0.3  # Fade out
+            # Beep when pulse reaches maximum opacity (most visible)
+            self.beep()
         
         # Update the icon with new opacity
         info = self.get_battery_info()
