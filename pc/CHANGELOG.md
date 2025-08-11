@@ -5,7 +5,7 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.1] - 2025-08-11 12:30:00
+## [0.5.1] - 2025-08-11 07:30:00 CDT
 
 ### Enhanced - Icon Space Utilization 🎨
 - **Improved Battery Icon Layout**: Enhanced system tray icon design for better space utilization
@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refined battery dimensions and terminal positioning for visual consistency
 - Maintained backward compatibility with all existing features and configurations
 
-## [0.5.0] - 2025-08-10 15:45:00
+## [0.5.0] - 2025-08-10 10:45:00 CDT
 
 ### Added - Cross-Platform Mainstream Release 🚀
 - **battmon.py**: The cross-platform proof-of-concept (`bm_x.py`) is now the official mainstream application
@@ -74,7 +74,7 @@ pip install PyQt6
 - ✅ **Future-Proof**: Built on modern Qt6 framework
 - ✅ **Easy Deployment**: Simplified distribution across platforms
 
-## [0.4.0] - 2025-08-10 10:20:00
+## [0.4.0] - 2025-08-10 05:20:00 CDT
 
 ### Added - Major Qt6 Release 🎉
 - **Complete Qt6 Implementation**: Brand new `battmon_qt6.py` with superior technology stack
@@ -146,7 +146,7 @@ pip install PyQt6
 python3 battmon_qt6.py
 ```
 
-## [0.3.0] - 2025-08-10 08:15:00
+## [0.3.0] - 2025-08-10 03:15:00 CDT
 
 ### Fixed
 - **Critical GdkPixbuf PNG Loading Issues**: Resolved crashes caused by missing PNG loaders on some Linux distributions
@@ -177,7 +177,7 @@ python3 battmon_qt6.py
 - Fixed "Failed to load image-missing.png" system icon fallback crashes
 - Resolved core dumps on systems with incomplete GdkPixbuf PNG support
 
-## [0.2.0] - 2025-08-10 07:30:00
+## [0.2.0] - 2025-08-10 02:30:00 CDT
 
 ### Added
 - **Custom Icon System**: Complete support for user-created battery icon templates
@@ -232,7 +232,7 @@ python3 battmon_qt6.py
 sudo apt install python3 python3-gi python3-gi-cairo gir1.2-gtk-3.0 gir1.2-gdk-3.0 gir1.2-gdkpixbuf-2.0 acpi
 ```
 
-## [0.1.0] - 2025-08-09 16:00:00
+## [0.1.0] - 2025-08-09 11:00:00 CDT
 
 ### Added
 - Initial release of BattMon PC - Battery Monitor for Linux
