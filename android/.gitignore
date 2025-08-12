@@ -105,3 +105,10 @@ lint/tmp/
 *.swp
 *~
 
+# Miscellaneous asset files not tracked in repo
+ICON_battery.pbm
+ICON_battery.png
+icons/
+info/
+PROMPT_battmon.txt
+
