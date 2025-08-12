@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.2 - A Qt6-based cross-platform version with audio alerts
+Version 0.5.3 - A Qt6-based cross-platform version with audio alerts
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ import platform
 import configparser
 import datetime
 import io
+import time
 
 try:
     from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
@@ -34,7 +35,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.2'
+VERSION = '0.5.3'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -246,12 +247,15 @@ class BattMonCrossPlatform(QWidget):
         self.battery_widget = None
         self.last_percentage = None
         self.last_state = None
+        # Track last seen percentage across ticks (for drop detection across state changes)
+        self.last_seen_percent = None
         
         # Pulsing animation state
         self.pulse_opacity = 1.0
         self.pulse_direction = -0.3  # Fade direction and speed
         self.pulse_timer = None
-        self.beep_with_pulse = True  # Enable/disable beeps with pulsing
+        # Disable pulse beeps so only 1% step beeps are heard
+        self.beep_with_pulse = False  # Enable/disable beeps with pulsing
         
         # Create system tray icon
         self.tray_icon = QSystemTrayIcon(self)
@@ -618,6 +622,31 @@ License: GPL v2+</p>"""
         
         # Fallback: silent (no beep)
         
+    def alert_beep(self, times: int = 1):
+        """Cross-platform short beep N times (separate from pulsing)."""
+        system = platform.system().lower()
+        for _ in range(max(1, times)):
+            if system == 'windows':
+                try:
+                    import winsound
+                    winsound.Beep(880, 120)
+                except Exception:
+                    try:
+                        os.system('echo \a')
+                    except Exception:
+                        pass
+            else:
+                try:
+                    subprocess.run(['play', '-nq', 'synth', '0.12', 'sine', '880'],
+                                   capture_output=True, check=True, timeout=2)
+                except Exception:
+                    try:
+                        sys.stdout.write('\a')
+                        sys.stdout.flush()
+                    except Exception:
+                        pass
+            time.sleep(0.08)
+
     def pulse_update(self):
         """Update pulse animation state"""
         # Update opacity for pulsing effect
@@ -816,6 +845,23 @@ License: GPL v2+</p>"""
         if self.battery_widget and self.battery_widget.isVisible():
             self.battery_widget.update_battery_info(info)
         
+        # Beep when percentage decreases by 1 (or more) since last tick while NOT charging
+        # This uses last_seen_percent so it works across state transitions.
+        if self.last_seen_percent is not None:
+            drop_any = self.last_seen_percent - percentage
+            print(f"[DEBUG] drop-check last_seen={self.last_seen_percent}% current={percentage}% drop_any={drop_any} is_charging={is_charging}")
+            if not is_charging and drop_any >= 1:
+                if percentage < 30:
+                    print("[DEBUG] RED zone 1%+ drop detected -> double beep")
+                    self.alert_beep(2)
+                elif 30 <= percentage < 50:
+                    print("[DEBUG] ORANGE zone 1%+ drop detected -> single beep")
+                    self.alert_beep(1)
+        else:
+            print(f"[DEBUG] initializing last_seen_percent at {percentage}%")
+        # Update last seen for next tick
+        self.last_seen_percent = percentage
+        
         # Print status message
         if show_message:
             print(f"[{CURRENT_OS}] Battery: {percentage}% {state}")
@@ -892,6 +938,11 @@ def main():
     # Create main application
     try:
         battmon = BattMonCrossPlatform()
+        # Beep once on program load to confirm startup
+        try:
+            battmon.alert_beep(1)
+        except Exception:
+            pass
         
         print(f"BattMon Cross-Platform v{VERSION} initialized successfully on {CURRENT_OS}")
         print("Features:")

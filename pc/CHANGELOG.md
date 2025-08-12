@@ -5,6 +5,19 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-08-12 04:33:00 CDT
+
+### Fixed - Low Battery Beep Logic and Startup Confirmation ✅
+- Beep on 1%+ drop while not charging now works reliably across state transitions (e.g., when entering Discharging exactly as a 1% drop occurs)
+  - Implemented last_seen_percent tracking each tick
+  - Triggers beeps when current percent is at least 1 lower than last_seen_percent
+  - Orange (30–49%): single beep; Red (<30%): double beep
+- Added clear debug logs for drop detection and charging state for easier troubleshooting
+- Added a short startup beep to confirm the application initialized successfully
+
+### Notes
+- Windows still reports integer battery percentages; sub-percentage precision is not available via standard APIs.
+
 ## [0.5.2] - 2025-08-11 12:53:00 CDT
 
 ### Added - Audio Alert System 🔊
