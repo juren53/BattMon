@@ -849,7 +849,7 @@ License: GPL v2+</p>"""
         # This uses last_seen_percent so it works across state transitions.
         if self.last_seen_percent is not None:
             drop_any = self.last_seen_percent - percentage
-            print(f"[DEBUG] drop-check last_seen={self.last_seen_percent}% current={percentage}% drop_any={drop_any} is_charging={is_charging}")
+            # print(f"[DEBUG] drop-check last_seen={self.last_seen_percent}% current={percentage}% drop_any={drop_any} is_charging={is_charging}")
             if not is_charging and drop_any >= 1:
                 if percentage < 30:
                     print("[DEBUG] RED zone 1%+ drop detected -> double beep")
@@ -858,7 +858,8 @@ License: GPL v2+</p>"""
                     print("[DEBUG] ORANGE zone 1%+ drop detected -> single beep")
                     self.alert_beep(1)
         else:
-            print(f"[DEBUG] initializing last_seen_percent at {percentage}%")
+            # print(f"[DEBUG] initializing last_seen_percent at {percentage}%")
+            pass
         # Update last seen for next tick
         self.last_seen_percent = percentage
         
