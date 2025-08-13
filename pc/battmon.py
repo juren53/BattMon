@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.3 - A Qt6-based cross-platform version with audio alerts
+Version 0.5.4 - A Qt6-based cross-platform version with audio alerts
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.3'
+VERSION = '0.5.4'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -355,21 +355,6 @@ class BattMonCrossPlatform(QWidget):
 <li>High DPI display support</li>
 </ul>
 
-<p><b>Platform-Specific Features:</b></p>
-<ul>
-<li><b>Linux:</b> Uses ACPI for battery information</li>
-<li><b>Windows:</b> Uses WMI/PowerShell for battery data</li>
-<li><b>macOS:</b> Uses system_profiler for battery status</li>
-</ul>
-
-<p><b>Key Advantages:</b></p>
-<ul>
-<li>Single codebase for all platforms</li>
-<li>Native look and feel on each OS</li>
-<li>No platform-specific dependencies</li>
-<li>Superior graphics rendering</li>
-<li>Modern UI framework</li>
-</ul>
 
 <p>Developed with Python 3 + PyQt6<br>
 License: GPL v2+</p>"""

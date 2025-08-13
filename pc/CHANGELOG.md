@@ -5,6 +5,20 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - 2025-08-13 22:35:00 CDT
+
+### Changed - Streamlined About Dialog 📄
+- **Simplified About Dialog**: Removed redundant sections from the About dialog
+  - Removed "Key Advantages" section (single codebase, native look/feel, etc.)
+  - Removed "Platform-Specific Features" section (Linux ACPI, Windows WMI/PowerShell, macOS pmset details)
+  - Maintained core feature list and essential information (version, build date, Qt version, platform)
+  - Cleaner, more focused presentation without duplicate information
+
+### User Experience Improvements
+- **Cleaner Interface**: About dialog now flows more naturally from feature list to developer information
+- **Reduced Clutter**: Removed technical implementation details that were redundant with feature descriptions
+- **Better Focus**: Highlights the application's capabilities without overwhelming technical specifics
+
 ## [0.5.3] - 2025-08-12 04:33:00 CDT
 
 ### Fixed - Low Battery Beep Logic and Startup Confirmation ✅
