@@ -18,18 +18,18 @@ BattMon Cross-Platform is a modern battery monitoring application that runs on L
 
 ### First Launch
 When you start BattMon for the first time:
-- A system tray icon will appear showing your current battery percentage
-- A startup notification will display your configured milestone thresholds
+- A system tray icon will appear showing the current battery percentage
+- A startup notification will display the configured milestone thresholds
 - The application runs continuously in the background
 
 ### Basic Usage
 - **Left-click** the tray icon to show the detailed battery window
 - **Right-click** the tray icon to access the context menu
-- The tray icon automatically updates to reflect your current battery status
+- The tray icon automatically updates to reflect the current battery 'state of charge'
 
 ## System Tray
 
-The system tray icon is your primary interface with BattMon. It provides at-a-glance information about your battery status.
+The system tray icon is the primary interface with BattMon. It provides at-a-glance information about the battery status.
 
 ### Tray Icon Features
 - **Dynamic battery visualization**: Shows actual battery fill level
@@ -46,14 +46,14 @@ The system tray icon is your primary interface with BattMon. It provides at-a-gl
 Right-click the tray icon to access:
 - **Battery Status**: Current percentage and state (disabled item)
 - **Show Battery Window**: Opens detailed battery information
-- **🔔 Show Notification Settings**: Displays your current milestone configuration
+- **🔔 Show Notification Settings**: Displays the current milestone configuration
 - **Help**: Opens this help documentation
 - **About**: Application information and version details
 - **Quit**: Close the application
 
 ## Battery Window
 
-The battery window provides detailed information about your battery status in a clean, modern interface.
+The battery window provides detailed information about the battery status in a clean, modern interface.
 
 ### Window Features
 - **Large percentage display**: Easy-to-read battery level
@@ -70,13 +70,13 @@ The battery window provides detailed information about your battery status in a 
 
 ## Notifications
 
-BattMon features a comprehensive desktop notification system to keep you informed about your battery status.
+BattMon features a comprehensive desktop notification system to keep you informed about the battery status.
 
 ### Milestone Notifications
 - **Default thresholds**: 90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%
 - **Charging milestones**: 25%, 50%, 75%, 90%, 100%
 - **Smart notifications**: Prevents spam by tracking last triggered milestone
-- **Native platform notifications**: Uses your operating system's notification system
+- **Native platform notifications**: Uses the operating system's notification system
 
 ### Notification Types
 - **Startup notification**: Shows configured milestones when app starts
@@ -173,7 +173,7 @@ BattMon adapts to each operating system's conventions and capabilities.
 ### Common Issues
 
 #### System Tray Icon Not Visible
-- **Linux**: Ensure your desktop environment supports system tray
+- **Linux**: Ensure the desktop environment supports system tray
 - **Windows**: Check if system tray icons are enabled in taskbar settings
 - **macOS**: Look in the menu bar area
 
@@ -199,7 +199,7 @@ If you encounter issues not covered here:
 1. **Check the GitHub Issues**: [https://github.com/juren53/BattMon/issues](https://github.com/juren53/BattMon/issues)
 2. **Review the changelog**: See `CHANGELOG.md` for recent changes
 3. **Check system requirements**: Ensure PyQt6 is properly installed
-4. **File a bug report**: Include your OS, Python version, and error details
+4. **File a bug report**: Include the OS, Python version, and error details
 
 ## FAQ
 
@@ -210,7 +210,7 @@ A: No, BattMon uses minimal system resources and updates only every 2 seconds. T
 A: Currently, thresholds are set to standard values. Future versions will include a settings interface for customization.
 
 ### Q: Why don't I see time remaining information?
-A: Time remaining depends on your operating system providing this information. Some systems don't calculate or expose these estimates.
+A: Time remaining depends on the operating system providing this information. Some systems don't calculate or expose these estimates.
 
 ### Q: Can I run multiple instances of BattMon?
 A: It's not recommended. BattMon is designed to run as a single instance in the system tray.
@@ -236,4 +236,4 @@ This help documentation covers BattMon Cross-Platform version 0.5.6 and later. F
 For the most up-to-date information, visit the project repository at:
 [https://github.com/juren53/BattMon](https://github.com/juren53/BattMon)
 
-**Last updated**: 2025-08-14 02:01
+**Last updated**: 2025-08-14 07:20
