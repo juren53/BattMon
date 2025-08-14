@@ -358,10 +358,14 @@ class BattMonCrossPlatform(QWidget):
         try:
             # Try to read the HELP.md file
             help_file_path = os.path.join(os.path.dirname(__file__), 'HELP.md')
+            print(f"[DEBUG] Help file path: {help_file_path}")
+            print(f"[DEBUG] File exists: {os.path.exists(help_file_path)}")
             
             if os.path.exists(help_file_path):
                 with open(help_file_path, 'r', encoding='utf-8') as f:
                     help_content = f.read()
+                print(f"[DEBUG] Content length: {len(help_content)} characters")
+                print(f"[DEBUG] First 50 chars: {repr(help_content[:50])}")
                 
                 # Create a help window/dialog to display the markdown content
                 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QHBoxLayout
@@ -375,23 +379,56 @@ class BattMonCrossPlatform(QWidget):
                 # Set dialog icon
                 help_dialog.setWindowIcon(QIcon(self.create_battery_icon(75, False).pixmap(32, 32)))
                 
+                # Dark theme for the entire dialog
+                help_dialog.setStyleSheet("""
+                    QDialog {
+                        background-color: #1e1e1e;
+                        color: #e8e8e8;
+                    }
+                    QPushButton {
+                        background-color: #404040;
+                        color: #e8e8e8;
+                        border: 1px solid #606060;
+                        border-radius: 4px;
+                        padding: 8px 16px;
+                        font-weight: bold;
+                    }
+                    QPushButton:hover {
+                        background-color: #505050;
+                        border-color: #707070;
+                    }
+                    QPushButton:pressed {
+                        background-color: #353535;
+                    }
+                """)
+                
                 layout = QVBoxLayout()
                 
                 # Text area for help content
                 text_edit = QTextEdit()
+                print(f"[DEBUG] Setting text content in QTextEdit...")
                 text_edit.setPlainText(help_content)
                 text_edit.setReadOnly(True)
                 
-                # Style the text edit for better readability
+                # Check if content was actually set
+                actual_content = text_edit.toPlainText()
+                print(f"[DEBUG] QTextEdit content length after setting: {len(actual_content)}")
+                print(f"[DEBUG] Content matches: {actual_content == help_content}")
+                print(f"[DEBUG] First 50 chars from QTextEdit: {repr(actual_content[:50])}")
+                
+                # Modern dark theme styling for better readability
                 text_edit.setStyleSheet("""
                     QTextEdit {
-                        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-                        font-size: 12px;
-                        line-height: 1.4;
-                        background-color: #f8f9fa;
-                        border: 1px solid #dee2e6;
-                        border-radius: 4px;
-                        padding: 10px;
+                        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+                        font-size: 13px;
+                        line-height: 1.5;
+                        background-color: #2b2b2b;
+                        color: #e8e8e8;
+                        border: 1px solid #555555;
+                        border-radius: 6px;
+                        padding: 15px;
+                        selection-background-color: #404040;
+                        selection-color: #ffffff;
                     }
                 """)
                 
