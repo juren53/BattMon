@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.6 - A Qt6-based cross-platform version with desktop notifications
+Version 0.5.7 - A Qt6-based cross-platform version with desktop notifications and help system
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.6'
+VERSION = '0.5.7'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -313,6 +313,11 @@ class BattMonCrossPlatform(QWidget):
         
         menu.addSeparator()
         
+        # Help action
+        help_action = QAction("📖 Help", self)
+        help_action.triggered.connect(self.show_help)
+        menu.addAction(help_action)
+        
         # About action
         about_action = QAction("About BattMon Cross-Platform", self)
         about_action.triggered.connect(self.show_about)
@@ -347,6 +352,132 @@ class BattMonCrossPlatform(QWidget):
         self.battery_widget.show()
         self.battery_widget.raise_()
         self.battery_widget.activateWindow()
+    
+    def show_help(self):
+        """Show help documentation"""
+        try:
+            # Try to read the HELP.md file
+            help_file_path = os.path.join(os.path.dirname(__file__), 'HELP.md')
+            
+            if os.path.exists(help_file_path):
+                with open(help_file_path, 'r', encoding='utf-8') as f:
+                    help_content = f.read()
+                
+                # Create a help window/dialog to display the markdown content
+                from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QHBoxLayout
+                from PyQt6.QtCore import QSize
+                
+                help_dialog = QDialog()
+                help_dialog.setWindowTitle("BattMon Cross-Platform - Help")
+                help_dialog.setMinimumSize(QSize(800, 600))
+                help_dialog.resize(QSize(900, 700))
+                
+                # Set dialog icon
+                help_dialog.setWindowIcon(QIcon(self.create_battery_icon(75, False).pixmap(32, 32)))
+                
+                layout = QVBoxLayout()
+                
+                # Text area for help content
+                text_edit = QTextEdit()
+                text_edit.setPlainText(help_content)
+                text_edit.setReadOnly(True)
+                
+                # Style the text edit for better readability
+                text_edit.setStyleSheet("""
+                    QTextEdit {
+                        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                        font-size: 12px;
+                        line-height: 1.4;
+                        background-color: #f8f9fa;
+                        border: 1px solid #dee2e6;
+                        border-radius: 4px;
+                        padding: 10px;
+                    }
+                """)
+                
+                # Button layout
+                button_layout = QHBoxLayout()
+                button_layout.addStretch()
+                
+                # Close button
+                close_button = QPushButton("Close")
+                close_button.clicked.connect(help_dialog.accept)
+                close_button.setMinimumSize(QSize(100, 30))
+                
+                button_layout.addWidget(close_button)
+                
+                layout.addWidget(text_edit)
+                layout.addLayout(button_layout)
+                
+                help_dialog.setLayout(layout)
+                help_dialog.exec()
+                
+            else:
+                # Fallback if HELP.md file is not found
+                fallback_help = """
+BattMon Cross-Platform - Quick Help
+
+=== Basic Usage ===
+• Left-click the tray icon to show the battery window
+• Right-click the tray icon for the context menu
+• The tray icon shows your current battery percentage and status
+
+=== System Tray Icon ===
+• Green (75-100%): Good charge level
+• Yellow (50-74%): Medium charge level  
+• Orange (30-49%): Low charge level
+• Red (0-29%): Critical charge level
+• Lightning bolt: Charging indicator
+• Pulsing animation: Low battery warning
+
+=== Notifications ===
+• Desktop notifications at milestone battery levels
+• Default discharge alerts: 90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10%
+• Default charging alerts: 25%, 50%, 75%, 90%, 100%
+• Audio alerts with platform-specific sounds
+
+=== Battery Window ===
+• Large percentage display
+• Color-coded progress bar
+• Battery state information
+• Time remaining estimates (when available)
+• Always stays on top
+
+=== Keyboard Shortcuts ===
+• Escape: Close battery window
+• Alt+F4 (Windows/Linux): Close battery window
+• Cmd+W (macOS): Close battery window
+
+=== Configuration ===
+Settings are automatically saved in:
+• Linux: ~/.config/battmon/profile.json
+• Windows: %APPDATA%\\battmon\\profile.json  
+• macOS: ~/Library/Application Support/battmon/profile.json
+
+=== Platform Support ===
+• Linux: Uses ACPI for battery information
+• Windows: Uses WMI/PowerShell for battery data
+• macOS: Uses pmset for battery status
+
+=== Getting Help ===
+For more information, visit:
+https://github.com/juren53/BattMon
+
+Version: """ + VERSION + """
+Platform: """ + CURRENT_OS
+                
+                msg_box = QMessageBox()
+                msg_box.setWindowTitle("BattMon Cross-Platform - Help")
+                msg_box.setTextFormat(Qt.TextFormat.PlainText)
+                msg_box.setText(fallback_help)
+                msg_box.setIconPixmap(self.create_battery_icon(75, False).pixmap(64, 64))
+                msg_box.exec()
+                
+        except Exception as e:
+            print(f"Error showing help: {e}")
+            # Simple error fallback
+            QMessageBox.information(None, "Help", 
+                                   f"Help system error. Please visit:\nhttps://github.com/juren53/BattMon\n\nVersion: {VERSION}")
     
     def show_about(self):
         """Show about dialog"""

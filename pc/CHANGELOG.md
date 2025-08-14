@@ -7,6 +7,66 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.7] - 2025-08-14 07:10:00 CDT
+
+### Added - Comprehensive Help System 📖
+- **Complete Help Documentation**: Created comprehensive HELP.md file covering all features and usage
+  - **Table of Contents**: Well-organized sections covering Getting Started, System Tray, Battery Window, Notifications, etc.
+  - **Detailed Feature Explanations**: In-depth coverage of color coding, milestone notifications, audio alerts, and visual indicators
+  - **Platform-Specific Information**: Dedicated sections for Linux, Windows, and macOS specific features
+  - **Configuration Guide**: Complete documentation of user profile settings and file locations
+  - **Troubleshooting Section**: Common issues and solutions with step-by-step guidance
+  - **FAQ Section**: Answers to frequently asked questions about battery monitoring and application behavior
+
+- **Integrated Help Menu**: Added "📖 Help" option to system tray context menu
+  - **Help Dialog**: Modern, scrollable help viewer with clean monospace font styling
+  - **Auto-Loading**: Automatically reads HELP.md from application directory
+  - **Fallback Support**: Built-in quick help text when HELP.md file is not available
+  - **Professional Styling**: Readable font, proper padding, and consistent window sizing (900x700)
+  - **Battery Icon**: Help dialog includes battery icon for visual consistency
+
+### Help Documentation Features
+- **Comprehensive Coverage**: Documentation includes:
+  - Getting Started guide for first-time users
+  - Complete system tray functionality explanation
+  - Battery window features and controls
+  - Desktop notification system overview
+  - Visual indicator meanings and color coding
+  - Keyboard shortcuts reference
+  - Configuration file locations and format
+  - Platform-specific implementation details
+  - Troubleshooting guide for common issues
+  - Detailed FAQ section
+
+### User Experience Improvements
+- **Easy Access**: Help is now just one right-click away from the system tray
+- **Self-Contained Documentation**: No need to visit external websites for help
+- **Professional Presentation**: Clean, readable help dialog with proper formatting
+- **Contextual Information**: Help includes current version and platform information
+- **Searchable Content**: Text-based help allows for easy searching (Ctrl+F)
+
+### Technical Implementation
+- **Markdown Integration**: HELP.md file provides structured, maintainable documentation
+- **Qt6 Dialog System**: Modern help viewer using QTextEdit with read-only configuration
+- **Error Handling**: Graceful fallback when help file is missing or corrupted
+- **Cross-Platform Paths**: Help file detection works across all supported operating systems
+- **Memory Efficient**: Help content loaded on-demand only when requested
+
+### Documentation Highlights
+- **4-Tier Color System**: Clear explanation of Green/Yellow/Orange/Red battery level meanings
+- **Milestone Notifications**: Complete guide to discharge and charging alerts
+- **Audio System**: Platform-specific sound implementation details
+- **Configuration Management**: User profile locations and JSON format examples
+- **Platform Support**: Detailed coverage of Linux ACPI, Windows WMI/PowerShell, and macOS pmset integration
+
+### Benefits
+- ✅ **Enhanced User Support**: Comprehensive help reduces support requests and user confusion
+- ✅ **Improved Onboarding**: New users can quickly learn all features and capabilities
+- ✅ **Self-Service**: Users can troubleshoot issues independently using the built-in help
+- ✅ **Professional Polish**: Complete help system demonstrates application maturity and care
+- ✅ **Accessibility**: Text-based help works with screen readers and other accessibility tools
+- ✅ **Version Consistency**: Help documentation stays synchronized with application features
+
 ## [0.5.6] - 2025-08-14 03:05:00 CDT
 
 ### Added - Smart Desktop Notifications System 🔔
