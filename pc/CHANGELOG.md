@@ -7,6 +7,55 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.8] - 2025-08-14 14:06:42 CDT
+
+### Enhanced - Battery Status Window Phase 1 🔋
+- **Redesigned Battery Status Dialog**: Completely reimplemented the Battery Status Window to match the About dialog's professional styling
+  - **QMessageBox Integration**: Now uses the same QMessageBox format as the About window for visual consistency
+  - **Rich HTML Formatting**: Professional layout with proper headings, sections, and typography
+  - **Color-Coded Status**: Large, prominent battery percentage display with dynamic color coding (Green ≥75%, Yellow ≥50%, Orange ≥30%, Red <30%)
+  - **Comprehensive Battery Details**: Displays technology, manufacturer, voltage, and power draw information
+  - **Battery Health Section**: Shows health status, health percentage, design capacity, current capacity, and cycle count
+  - **Real-Time Updates**: Refresh button with live data updates and timestamp tracking
+  - **Platform Integration**: Battery icon integration and consistent window styling across all platforms
+
+### Battery Information Features
+- **Enhanced Data Collection**: Improved platform-specific battery information gathering
+  - **Linux**: Extended `/sys/class/power_supply/` integration for voltage, technology, manufacturer, capacity info, cycle count, power draw, and health status
+  - **Windows**: Enhanced WMI integration for chemistry mapping, device info, capacity calculations, and health assessment
+  - **macOS**: Improved `system_profiler` and `ioreg` parsing for cycle count, health condition, capacity data, and voltage information
+  - **Fallback Support**: Robust error handling with graceful degradation when detailed info is unavailable
+
+### User Experience Improvements
+- **Visual Consistency**: Battery Status Window now perfectly matches the About dialog's modern, professional appearance
+  - **Typography**: Same font styling, colors, and layout patterns as the About window
+  - **Section Organization**: Clear visual hierarchy with emoji icons (⚡ Battery Details, 💚 Battery Health)
+  - **Status Indicators**: Color-coded percentage display with charging indicator (⚡) and status icons (🔋🚨⚠️)
+  - **Refresh Functionality**: Live updates with working refresh button and real-time timestamp
+
+### Technical Implementation
+- **Dialog Architecture**: Replaced complex custom widget with streamlined QMessageBox approach
+  - **Simplified Codebase**: Eliminated 500+ lines of complex widget styling and layout code
+  - **Better Maintainability**: Uses Qt's native dialog styling instead of custom CSS implementations
+  - **Consistent Behavior**: Same user interaction patterns as the About dialog (refresh loop, button handling)
+  - **Resource Efficiency**: Lighter memory footprint with native Qt dialog management
+
+### Platform-Specific Enhancements
+- **Cross-Platform Battery APIs**: Enhanced integration with native battery information systems
+  - **Linux**: Better `/sys/class/power_supply/` file parsing with comprehensive error handling
+  - **Windows**: Improved WMI battery chemistry detection and capacity calculation accuracy
+  - **macOS**: Enhanced XML parsing for `system_profiler` output and better `ioreg` integration
+  - **Unified Interface**: Consistent battery information structure across all platforms
+
+### Key Benefits
+- ✅ **Professional Appearance**: Battery Status Window now matches the application's modern design language
+- ✅ **Rich Information Display**: Comprehensive battery details including health metrics and technical specifications
+- ✅ **Live Data Updates**: Real-time refresh capability with accurate timestamp tracking
+- ✅ **Cross-Platform Consistency**: Unified experience across Linux, Windows, and macOS
+- ✅ **Improved Maintainability**: Cleaner codebase with better separation of concerns
+- ✅ **Enhanced User Experience**: Intuitive interface with clear visual hierarchy and professional styling
+- ✅ **Resource Efficiency**: Lighter implementation using Qt's native dialog components
+
 ## [0.5.7] - 2025-08-14 07:10:00 CDT
 
 ### Added - Comprehensive Help System 📖

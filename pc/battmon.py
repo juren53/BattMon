@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.7 - A Qt6-based cross-platform version with desktop notifications and help system
+Version 0.5.8 - Enhanced Battery Status Window with comprehensive health info and modern styling
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.7'
+VERSION = '0.5.8'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -47,191 +47,148 @@ IS_WINDOWS = CURRENT_OS == "Windows"
 IS_LINUX = CURRENT_OS == "Linux"
 IS_MACOS = CURRENT_OS == "Darwin"
 
-class BatteryWidget(QWidget):
-    """A widget to display battery information in a window"""
-    
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle(f"BattMon Cross-Platform - Battery Status ({CURRENT_OS})")
-        self.setFixedSize(380, 220)
-        self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
+def show_battery_window_dialog(parent_app):
+    """Show battery status in a QMessageBox dialog that matches About window style"""
+    try:
+        # Get battery information
+        info = parent_app.get_battery_info()
+        detailed_info = parent_app.get_detailed_battery_info()
         
-        # Set window icon
-        icon_pixmap = self.create_window_icon()
-        self.setWindowIcon(QIcon(icon_pixmap))
-        
-        layout = QVBoxLayout()
-        
-        # Title
-        title_layout = QHBoxLayout()
-        title_icon = QLabel()
-        title_icon.setPixmap(icon_pixmap.scaled(32, 32, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        
-        title_label = QLabel("BattMon Cross-Platform")
-        title_font = title_label.font()
-        title_font.setPointSize(16)
-        title_font.setBold(True)
-        title_label.setFont(title_font)
-        
-        # OS indicator
-        os_label = QLabel(f"Running on {CURRENT_OS}")
-        os_font = os_label.font()
-        os_font.setPointSize(10)
-        os_label.setFont(os_font)
-        os_label.setStyleSheet("color: #666666;")
-        
-        title_layout.addWidget(title_icon)
-        title_layout.addWidget(title_label)
-        title_layout.addStretch()
-        title_layout.addWidget(os_label)
-        
-        # Battery percentage (large display)
-        self.percentage_label = QLabel("0%")
-        self.percentage_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        percentage_font = self.percentage_label.font()
-        percentage_font.setPointSize(32)
-        percentage_font.setBold(True)
-        self.percentage_label.setFont(percentage_font)
-        
-        # Progress bar
-        self.progress_bar = QProgressBar()
-        self.progress_bar.setRange(0, 100)
-        self.progress_bar.setFixedHeight(30)
-        
-        # Status info
-        self.state_label = QLabel("Unknown")
-        self.state_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        state_font = self.state_label.font()
-        state_font.setPointSize(12)
-        self.state_label.setFont(state_font)
-        
-        self.time_label = QLabel("")
-        self.time_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
-        # Close button
-        close_button = QPushButton("Close")
-        close_button.clicked.connect(self.hide)
-        
-        layout.addLayout(title_layout)
-        layout.addWidget(self.percentage_label)
-        layout.addWidget(self.progress_bar)
-        layout.addWidget(self.state_label)
-        layout.addWidget(self.time_label)
-        layout.addStretch()
-        layout.addWidget(close_button)
-        
-        self.setLayout(layout)
-        
-        # Apply modern styling with OS-appropriate colors
-        if IS_WINDOWS:
-            # Windows 11 style
-            bg_color = "#f9f9f9"
-            accent_color = "#0078d4"
-            hover_color = "#106ebe"
-            pressed_color = "#005a9e"
-        else:
-            # Linux/Unix style
-            bg_color = "#f0f0f0"
-            accent_color = "#007acc"
-            hover_color = "#005a9e"
-            pressed_color = "#004578"
-        
-        self.setStyleSheet(f"""
-            QWidget {{
-                background-color: {bg_color};
-                font-family: 'Segoe UI', Arial, sans-serif;
-            }}
-            QLabel {{
-                color: #333333;
-            }}
-            QProgressBar {{
-                border: 2px solid #cccccc;
-                border-radius: 5px;
-                text-align: center;
-                font-weight: bold;
-            }}
-            QProgressBar::chunk {{
-                border-radius: 3px;
-            }}
-            QPushButton {{
-                background-color: {accent_color};
-                border: none;
-                color: white;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }}
-            QPushButton:hover {{
-                background-color: {hover_color};
-            }}
-            QPushButton:pressed {{
-                background-color: {pressed_color};
-            }}
-        """)
-        
-    def create_window_icon(self):
-        """Create a window icon"""
-        pixmap = QPixmap(32, 32)
-        pixmap.fill(Qt.GlobalColor.transparent)
-        
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
-        # Draw battery outline
-        painter.setPen(QPen(QColor(0, 0, 0), 2))
-        painter.setBrush(QBrush(QColor(100, 200, 100)))
-        painter.drawRect(4, 12, 22, 10)
-        
-        # Draw battery terminal
-        painter.fillRect(26, 15, 3, 4, QBrush(QColor(0, 0, 0)))
-        
-        painter.end()
-        return pixmap
-        
-    def update_battery_info(self, info):
-        """Update the widget with battery information"""
         percentage = info['percentage']
         state = info['state']
         time_remaining = info.get('time', '')
+        is_charging = info.get('state', '').lower() in ('charging', 'full')
         
-        self.percentage_label.setText(f"{percentage}%")
-        self.state_label.setText(state)
+        # Create prominent battery status display
+        charging_indicator = " ⚡" if is_charging else ""
+        time_info = f"<br><b>Time Remaining:</b> {time_remaining}" if time_remaining else ""
         
-        if time_remaining:
-            self.time_label.setText(f"Time: {time_remaining}")
-        else:
-            self.time_label.setText("")
-        
-        self.progress_bar.setValue(percentage)
-        
-        # Color-code the progress bar and percentage (4-tier system)
+        # Color-code the percentage based on battery level
         if percentage >= 75:
-            color = "#4CAF50"  # Green (100-75%)
-            text_color = "#2E7D32"
+            color = "#27ae60"  # Green
+            status_icon = "🔋"
         elif percentage >= 50:
-            color = "#FFEB3B"  # Yellow (74-50%)
-            text_color = "#F57F17"
+            color = "#f39c12"  # Orange-yellow
+            status_icon = "🔋"
         elif percentage >= 30:
-            color = "#FF9800"  # Orange (49-30%)
-            text_color = "#F57C00"
+            color = "#e67e22"  # Orange
+            status_icon = "⚠️"
         else:
-            color = "#F44336"  # Red (29-0%)
-            text_color = "#C62828"
-            
-        self.progress_bar.setStyleSheet(f"""
-            QProgressBar {{
-                border: 2px solid #cccccc;
-                border-radius: 5px;
-                text-align: center;
-                font-weight: bold;
-            }}
-            QProgressBar::chunk {{
-                background-color: {color};
-                border-radius: 3px;
-            }}
-        """)
+            color = "#e74c3c"  # Red
+            status_icon = "🚨"
         
-        self.percentage_label.setStyleSheet(f"color: {text_color};")
+        # Build the battery status text in the same format as About window
+        current_time = datetime.datetime.now().strftime("%H:%M:%S")
+        
+        battery_text = f"""<h2>{status_icon} BattMon Cross-Platform - Battery Status</h2>
+
+<p><b>Current Charge:</b> <span style="color: {color}; font-size: 18pt; font-weight: bold;">{percentage}%{charging_indicator}</span><br>
+<b>Battery State:</b> {state}{time_info}<br>
+<b>Platform:</b> {CURRENT_OS}<br>
+<b>Last Updated:</b> {current_time}</p>
+
+<h3>⚡ Battery Details</h3>
+<p><b>Technology:</b> {detailed_info.get('technology', 'Unknown')}<br>
+<b>Manufacturer:</b> {detailed_info.get('manufacturer', 'Unknown')}<br>
+<b>Voltage:</b> {detailed_info.get('voltage', 'Unknown')}<br>
+<b>Power Draw:</b> {detailed_info.get('power_draw', 'Unknown')}</p>
+
+<h3>💚 Battery Health</h3>
+<p><b>Health Status:</b> {detailed_info.get('health_status', 'Unknown')}<br>
+<b>Health Percentage:</b> {detailed_info.get('health_percentage', 0)}%<br>
+<b>Design Capacity:</b> {detailed_info.get('design_capacity', 'Unknown')}<br>
+<b>Current Capacity:</b> {detailed_info.get('current_capacity', 'Unknown')}<br>
+<b>Cycle Count:</b> {detailed_info.get('cycle_count', 'Unknown')}</p>
+
+<p style="margin-top: 10px; text-align: center;">
+<b>BattMon Cross-Platform</b> v{VERSION}<br>
+<em>Real-time battery monitoring and health tracking</em>
+</p>"""
+        
+        # Create and show the message box in the same style as About
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle("Battery Status - BattMon Cross-Platform")
+        msg_box.setTextFormat(Qt.TextFormat.RichText)
+        msg_box.setText(battery_text)
+        msg_box.setIconPixmap(parent_app.create_battery_icon(percentage, is_charging, 24).pixmap(64, 64))
+        
+        # Add a Refresh button alongside OK
+        refresh_button = msg_box.addButton("🔄 Refresh", QMessageBox.ButtonRole.ActionRole)
+        ok_button = msg_box.addButton(QMessageBox.StandardButton.Ok)
+        msg_box.setDefaultButton(ok_button)
+        
+        # Show dialog and handle refresh
+        while True:
+            result = msg_box.exec()
+            clicked_button = msg_box.clickedButton()
+            
+            if clicked_button == refresh_button:
+                # Refresh data and update dialog
+                info = parent_app.get_battery_info()
+                detailed_info = parent_app.get_detailed_battery_info()
+                
+                percentage = info['percentage']
+                state = info['state']
+                time_remaining = info.get('time', '')
+                is_charging = info.get('state', '').lower() in ('charging', 'full')
+                
+                # Update colors and indicators
+                charging_indicator = " ⚡" if is_charging else ""
+                time_info = f"<br><b>Time Remaining:</b> {time_remaining}" if time_remaining else ""
+                
+                if percentage >= 75:
+                    color = "#27ae60"
+                    status_icon = "🔋"
+                elif percentage >= 50:
+                    color = "#f39c12"
+                    status_icon = "🔋"
+                elif percentage >= 30:
+                    color = "#e67e22"
+                    status_icon = "⚠️"
+                else:
+                    color = "#e74c3c"
+                    status_icon = "🚨"
+                
+                current_time = datetime.datetime.now().strftime("%H:%M:%S")
+                
+                # Update the text
+                battery_text = f"""<h2>{status_icon} BattMon Cross-Platform - Battery Status</h2>
+
+<p><b>Current Charge:</b> <span style="color: {color}; font-size: 18pt; font-weight: bold;">{percentage}%{charging_indicator}</span><br>
+<b>Battery State:</b> {state}{time_info}<br>
+<b>Platform:</b> {CURRENT_OS}<br>
+<b>Last Updated:</b> {current_time}</p>
+
+<h3>⚡ Battery Details</h3>
+<p><b>Technology:</b> {detailed_info.get('technology', 'Unknown')}<br>
+<b>Manufacturer:</b> {detailed_info.get('manufacturer', 'Unknown')}<br>
+<b>Voltage:</b> {detailed_info.get('voltage', 'Unknown')}<br>
+<b>Power Draw:</b> {detailed_info.get('power_draw', 'Unknown')}</p>
+
+<h3>💚 Battery Health</h3>
+<p><b>Health Status:</b> {detailed_info.get('health_status', 'Unknown')}<br>
+<b>Health Percentage:</b> {detailed_info.get('health_percentage', 0)}%<br>
+<b>Design Capacity:</b> {detailed_info.get('design_capacity', 'Unknown')}<br>
+<b>Current Capacity:</b> {detailed_info.get('current_capacity', 'Unknown')}<br>
+<b>Cycle Count:</b> {detailed_info.get('cycle_count', 'Unknown')}</p>
+
+<p style="margin-top: 10px; text-align: center;">
+<b>BattMon Cross-Platform</b> v{VERSION}<br>
+<em>Real-time battery monitoring and health tracking</em>
+</p>"""
+                
+                msg_box.setText(battery_text)
+                msg_box.setIconPixmap(parent_app.create_battery_icon(percentage, is_charging, 24).pixmap(64, 64))
+                
+                print("[DEBUG] Battery status refreshed")
+            else:
+                break
+                
+    except Exception as e:
+        print(f"[ERROR] Failed to show battery status: {e}")
+        # Fallback to simple message
+        QMessageBox.information(None, "Battery Status", 
+                               f"Battery Status Error\n\nUnable to retrieve battery information.\n\nError: {str(e)}")
 
 class BattMonCrossPlatform(QWidget):
     """Main cross-platform BattMon application"""
@@ -342,16 +299,7 @@ class BattMonCrossPlatform(QWidget):
     
     def show_battery_window(self):
         """Show the battery information window"""
-        if self.battery_widget is None:
-            self.battery_widget = BatteryWidget()
-        
-        # Update with current battery info
-        info = self.get_battery_info()
-        self.battery_widget.update_battery_info(info)
-        
-        self.battery_widget.show()
-        self.battery_widget.raise_()
-        self.battery_widget.activateWindow()
+        show_battery_window_dialog(self)
     
     def show_help(self):
         """Show help documentation"""
@@ -929,6 +877,300 @@ License: GPL v2+</p>
             
         return self.get_battery_info_fallback()
     
+    def get_detailed_battery_info(self):
+        """Get detailed battery information including health data"""
+        if IS_WINDOWS:
+            return self.get_detailed_battery_info_windows()
+        elif IS_LINUX:
+            return self.get_detailed_battery_info_linux()
+        elif IS_MACOS:
+            return self.get_detailed_battery_info_macos()
+        else:
+            return self.get_detailed_battery_info_fallback()
+    
+    def get_detailed_battery_info_windows(self):
+        """Get detailed battery information on Windows"""
+        detailed_info = {
+            'voltage': '--',
+            'temperature': '--',
+            'technology': '--',
+            'manufacturer': '--',
+            'health_status': 'Unknown',
+            'health_percentage': 0,
+            'design_capacity': '--',
+            'current_capacity': '--',
+            'cycle_count': '--',
+            'power_draw': '--'
+        }
+        
+        try:
+            # Try WMI for detailed info
+            try:
+                import wmi
+                c = wmi.WMI()
+                
+                # Get battery information
+                for battery in c.Win32_Battery():
+                    if battery.Chemistry:
+                        chemistry_map = {
+                            1: "Other",
+                            2: "Unknown",
+                            3: "Lead Acid",
+                            4: "Nickel Cadmium",
+                            5: "Nickel Metal Hydride",
+                            6: "Lithium Ion",
+                            7: "Zinc Air",
+                            8: "Lithium Polymer"
+                        }
+                        detailed_info['technology'] = chemistry_map.get(battery.Chemistry, "Unknown")
+                    
+                    if battery.DeviceID:
+                        detailed_info['manufacturer'] = battery.DeviceID or "Unknown"
+                    
+                    if battery.DesignCapacity and battery.FullChargeCapacity:
+                        design = battery.DesignCapacity
+                        current = battery.FullChargeCapacity
+                        detailed_info['design_capacity'] = f"{design} mWh"
+                        detailed_info['current_capacity'] = f"{current} mWh"
+                        
+                        # Calculate health percentage
+                        health_percentage = int((current / design) * 100) if design > 0 else 0
+                        detailed_info['health_percentage'] = max(0, min(100, health_percentage))
+                    
+                    break
+                
+                # Try to get additional info from Win32_SystemBattery
+                for battery in c.Win32_SystemBattery():
+                    if hasattr(battery, 'BatteryStatus'):
+                        if battery.BatteryStatus == 1:
+                            detailed_info['health_status'] = "Good"
+                        elif battery.BatteryStatus == 2:
+                            detailed_info['health_status'] = "Weak"
+                        else:
+                            detailed_info['health_status'] = "Unknown"
+                    break
+                    
+            except ImportError:
+                # Fallback to PowerShell
+                pass
+                
+        except Exception as e:
+            print(f"Error getting detailed Windows battery info: {e}")
+            
+        return detailed_info
+    
+    def get_detailed_battery_info_linux(self):
+        """Get detailed battery information on Linux using /sys/class/power_supply"""
+        detailed_info = {
+            'voltage': '--',
+            'temperature': '--',
+            'technology': '--',
+            'manufacturer': '--',
+            'health_status': 'Unknown',
+            'health_percentage': 0,
+            'design_capacity': '--',
+            'current_capacity': '--',
+            'cycle_count': '--',
+            'power_draw': '--'
+        }
+        
+        try:
+            # Find battery path
+            battery_path = None
+            for bat_name in os.listdir('/sys/class/power_supply/'):
+                if bat_name.startswith('BAT'):
+                    battery_path = f'/sys/class/power_supply/{bat_name}'
+                    break
+            
+            if battery_path:
+                # Read various battery properties
+                try:
+                    # Voltage (in microvolts)
+                    voltage_file = os.path.join(battery_path, 'voltage_now')
+                    if os.path.exists(voltage_file):
+                        with open(voltage_file, 'r') as f:
+                            voltage_uv = int(f.read().strip())
+                            voltage_v = voltage_uv / 1000000.0
+                            detailed_info['voltage'] = f"{voltage_v:.2f} V"
+                except:
+                    pass
+                
+                try:
+                    # Technology
+                    tech_file = os.path.join(battery_path, 'technology')
+                    if os.path.exists(tech_file):
+                        with open(tech_file, 'r') as f:
+                            detailed_info['technology'] = f.read().strip()
+                except:
+                    pass
+                
+                try:
+                    # Manufacturer
+                    mfg_file = os.path.join(battery_path, 'manufacturer')
+                    if os.path.exists(mfg_file):
+                        with open(mfg_file, 'r') as f:
+                            detailed_info['manufacturer'] = f.read().strip()
+                except:
+                    pass
+                
+                try:
+                    # Capacity information
+                    design_file = os.path.join(battery_path, 'energy_full_design')
+                    current_file = os.path.join(battery_path, 'energy_full')
+                    
+                    if os.path.exists(design_file) and os.path.exists(current_file):
+                        with open(design_file, 'r') as f:
+                            design_uwh = int(f.read().strip())
+                            design_wh = design_uwh / 1000000.0
+                            detailed_info['design_capacity'] = f"{design_wh:.2f} Wh"
+                        
+                        with open(current_file, 'r') as f:
+                            current_uwh = int(f.read().strip())
+                            current_wh = current_uwh / 1000000.0
+                            detailed_info['current_capacity'] = f"{current_wh:.2f} Wh"
+                            
+                            # Calculate health percentage
+                            health_percentage = int((current_wh / design_wh) * 100) if design_wh > 0 else 0
+                            detailed_info['health_percentage'] = max(0, min(100, health_percentage))
+                except:
+                    pass
+                
+                try:
+                    # Cycle count
+                    cycle_file = os.path.join(battery_path, 'cycle_count')
+                    if os.path.exists(cycle_file):
+                        with open(cycle_file, 'r') as f:
+                            detailed_info['cycle_count'] = f.read().strip()
+                except:
+                    pass
+                
+                try:
+                    # Power draw (in microwatts)
+                    power_file = os.path.join(battery_path, 'power_now')
+                    if os.path.exists(power_file):
+                        with open(power_file, 'r') as f:
+                            power_uw = int(f.read().strip())
+                            power_w = power_uw / 1000000.0
+                            detailed_info['power_draw'] = f"{power_w:.2f} W"
+                except:
+                    pass
+                
+                try:
+                    # Health status
+                    health_file = os.path.join(battery_path, 'health')
+                    if os.path.exists(health_file):
+                        with open(health_file, 'r') as f:
+                            detailed_info['health_status'] = f.read().strip().title()
+                except:
+                    pass
+                    
+        except Exception as e:
+            print(f"Error getting detailed Linux battery info: {e}")
+            
+        return detailed_info
+    
+    def get_detailed_battery_info_macos(self):
+        """Get detailed battery information on macOS using system_profiler"""
+        detailed_info = {
+            'voltage': '--',
+            'temperature': '--',
+            'technology': '--',
+            'manufacturer': '--',
+            'health_status': 'Unknown',
+            'health_percentage': 0,
+            'design_capacity': '--',
+            'current_capacity': '--',
+            'cycle_count': '--',
+            'power_draw': '--'
+        }
+        
+        try:
+            # Use system_profiler to get detailed battery info
+            result = subprocess.check_output(
+                ['system_profiler', 'SPPowerDataType', '-xml'],
+                text=True, timeout=10
+            )
+            
+            # Parse the XML output (simplified parsing)
+            if 'Health Information' in result:
+                # Extract cycle count
+                if 'Cycle Count' in result:
+                    import re
+                    cycle_match = re.search(r'Cycle Count</key>\s*<integer>(\d+)</integer>', result)
+                    if cycle_match:
+                        detailed_info['cycle_count'] = cycle_match.group(1)
+                
+                # Extract condition
+                if 'Condition' in result:
+                    condition_match = re.search(r'Condition</key>\s*<string>([^<]+)</string>', result)
+                    if condition_match:
+                        detailed_info['health_status'] = condition_match.group(1)
+                        
+                        # Map condition to health percentage
+                        condition = condition_match.group(1).lower()
+                        if 'normal' in condition:
+                            detailed_info['health_percentage'] = 90
+                        elif 'good' in condition:
+                            detailed_info['health_percentage'] = 75
+                        elif 'fair' in condition:
+                            detailed_info['health_percentage'] = 50
+                        else:
+                            detailed_info['health_percentage'] = 25
+            
+            # Get additional info from ioreg
+            try:
+                ioreg_result = subprocess.check_output(
+                    ['ioreg', '-rc', 'AppleSmartBattery'],
+                    text=True, timeout=5
+                )
+                
+                if 'DesignCapacity' in ioreg_result:
+                    design_match = re.search(r'"DesignCapacity"\s*=\s*(\d+)', ioreg_result)
+                    if design_match:
+                        design_mah = int(design_match.group(1))
+                        detailed_info['design_capacity'] = f"{design_mah} mAh"
+                
+                if 'MaxCapacity' in ioreg_result:
+                    max_match = re.search(r'"MaxCapacity"\s*=\s*(\d+)', ioreg_result)
+                    if max_match:
+                        max_mah = int(max_match.group(1))
+                        detailed_info['current_capacity'] = f"{max_mah} mAh"
+                        
+                        # Recalculate health percentage from actual values
+                        if 'design_capacity' in detailed_info and design_mah > 0:
+                            health_percentage = int((max_mah / design_mah) * 100)
+                            detailed_info['health_percentage'] = max(0, min(100, health_percentage))
+                
+                if 'Voltage' in ioreg_result:
+                    voltage_match = re.search(r'"Voltage"\s*=\s*(\d+)', ioreg_result)
+                    if voltage_match:
+                        voltage_mv = int(voltage_match.group(1))
+                        voltage_v = voltage_mv / 1000.0
+                        detailed_info['voltage'] = f"{voltage_v:.2f} V"
+                        
+            except:
+                pass
+                
+        except Exception as e:
+            print(f"Error getting detailed macOS battery info: {e}")
+            
+        return detailed_info
+    
+    def get_detailed_battery_info_fallback(self):
+        """Fallback detailed battery info"""
+        return {
+            'voltage': '--',
+            'temperature': '--',
+            'technology': '--',
+            'manufacturer': '--',
+            'health_status': 'Unknown',
+            'health_percentage': 0,
+            'design_capacity': '--',
+            'current_capacity': '--',
+            'cycle_count': '--',
+            'power_draw': '--'
+        }
+    
     def get_battery_info_linux(self):
         """Get battery information on Linux using ACPI"""
         try:
@@ -1295,9 +1537,7 @@ License: GPL v2+</p>
         # Update context menu status
         self.status_action.setText(f"Battery: {percentage}% ({state}) [{CURRENT_OS}]")
         
-        # Update battery window if it's open
-        if self.battery_widget and self.battery_widget.isVisible():
-            self.battery_widget.update_battery_info(info)
+        # Battery window now uses dialog style - no persistent window to update
         
         # Check for milestone notifications
         self.check_milestone_notifications(percentage, is_charging)
