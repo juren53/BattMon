@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.5 - A Qt6-based cross-platform version with audio alerts
+Version 0.5.6 - A Qt6-based cross-platform version with desktop notifications
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import configparser
 import datetime
 import io
 import time
+import json
 
 try:
     from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
@@ -35,7 +36,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.5'
+VERSION = '0.5.6'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -250,6 +251,14 @@ class BattMonCrossPlatform(QWidget):
         # Track last seen percentage across ticks (for drop detection across state changes)
         self.last_seen_percent = None
         
+        # Desktop notifications system
+        self.user_profile = self.load_user_profile()
+        self.milestone_thresholds = self.user_profile.get('milestone_thresholds', [90, 80, 70, 60, 50, 40, 30, 20, 10])
+        self.charging_milestones = self.user_profile.get('charging_milestones', [25, 50, 75, 90, 100])
+        self.notifications_enabled = self.user_profile.get('notifications_enabled', True)
+        self.last_milestone_triggered = None  # Track last milestone to prevent spam
+        self.last_charging_milestone = None  # Track charging milestones separately
+        
         # Pulsing animation state
         self.pulse_opacity = 1.0
         self.pulse_direction = -0.3  # Fade direction and speed
@@ -275,6 +284,9 @@ class BattMonCrossPlatform(QWidget):
         # Show tray icon
         self.tray_icon.show()
         
+        # Show startup notification with milestone thresholds
+        self.show_startup_notification()
+        
         print(f"BattMon Cross-Platform started on {CURRENT_OS} - system tray icon should be visible")
         print("Left-click to show battery window, Right-click for menu")
         
@@ -293,6 +305,13 @@ class BattMonCrossPlatform(QWidget):
         show_action = QAction("Show Battery Window", self)
         show_action.triggered.connect(self.show_battery_window)
         menu.addAction(show_action)
+        
+        # Show notification settings action
+        settings_action = QAction("🔔 Show Notification Settings", self)
+        settings_action.triggered.connect(self.show_startup_notification)
+        menu.addAction(settings_action)
+        
+        menu.addSeparator()
         
         # About action
         about_action = QAction("About BattMon Cross-Platform", self)
@@ -374,9 +393,272 @@ License: GPL v2+</p>
     def quit_application(self):
         """Quit the application"""
         print(f"BattMon Cross-Platform shutting down on {CURRENT_OS}...")
+        # Save user profile before quitting
+        self.save_user_profile()
         if self.battery_widget:
             self.battery_widget.close()
         QApplication.quit()
+    
+    def get_config_dir(self):
+        """Get the user configuration directory path"""
+        if IS_WINDOWS:
+            # Windows: Use APPDATA
+            config_base = os.environ.get('APPDATA', os.path.expanduser('~'))
+            return os.path.join(config_base, 'BattMon')
+        else:
+            # Linux/macOS: Use XDG_CONFIG_HOME or ~/.config
+            config_base = os.environ.get('XDG_CONFIG_HOME', os.path.expanduser('~/.config'))
+            return os.path.join(config_base, 'battmon')
+    
+    def load_user_profile(self):
+        """Load user profile from configuration file"""
+        config_dir = self.get_config_dir()
+        profile_path = os.path.join(config_dir, 'profile.json')
+        
+        # Default profile settings
+        default_profile = {
+            'milestone_thresholds': [90, 80, 70, 60, 50, 40, 30, 20, 10],
+            'charging_milestones': [25, 50, 75, 90, 100],
+            'notifications_enabled': True,
+            'notification_timeout': 5000,  # milliseconds
+            'play_sound': True,
+            'version': VERSION
+        }
+        
+        try:
+            if os.path.exists(profile_path):
+                with open(profile_path, 'r', encoding='utf-8') as f:
+                    profile = json.load(f)
+                # Merge with defaults to handle missing keys in older profiles
+                for key, value in default_profile.items():
+                    if key not in profile:
+                        profile[key] = value
+                print(f"Loaded user profile from: {profile_path}")
+                return profile
+            else:
+                # Create default profile file
+                os.makedirs(config_dir, exist_ok=True)
+                with open(profile_path, 'w', encoding='utf-8') as f:
+                    json.dump(default_profile, f, indent=2)
+                print(f"Created default user profile at: {profile_path}")
+                return default_profile
+                
+        except Exception as e:
+            print(f"Error loading user profile: {e}")
+            print("Using default settings")
+            return default_profile
+    
+    def save_user_profile(self):
+        """Save current user profile to configuration file"""
+        config_dir = self.get_config_dir()
+        profile_path = os.path.join(config_dir, 'profile.json')
+        
+        try:
+            # Update profile with current settings
+            self.user_profile.update({
+                'milestone_thresholds': self.milestone_thresholds,
+                'charging_milestones': self.charging_milestones,
+                'notifications_enabled': self.notifications_enabled,
+                'version': VERSION
+            })
+            
+            os.makedirs(config_dir, exist_ok=True)
+            with open(profile_path, 'w', encoding='utf-8') as f:
+                json.dump(self.user_profile, f, indent=2)
+            print(f"Saved user profile to: {profile_path}")
+            
+        except Exception as e:
+            print(f"Error saving user profile: {e}")
+    
+    def show_desktop_notification(self, title, message, notification_type='info'):
+        """Show cross-platform desktop notification"""
+        if not self.notifications_enabled:
+            return
+        
+        try:
+            # Use Qt's built-in system tray notification as primary method
+            icon_type = QSystemTrayIcon.MessageIcon.Information
+            
+            if notification_type == 'warning':
+                icon_type = QSystemTrayIcon.MessageIcon.Warning
+            elif notification_type == 'critical':
+                icon_type = QSystemTrayIcon.MessageIcon.Critical
+            
+            # Show notification with timeout from user profile
+            timeout = self.user_profile.get('notification_timeout', 5000)
+            self.tray_icon.showMessage(title, message, icon_type, timeout)
+            
+            # Platform-specific enhancements
+            if IS_LINUX:
+                self._show_linux_notification(title, message, notification_type)
+            elif IS_WINDOWS:
+                self._show_windows_notification(title, message, notification_type)
+            elif IS_MACOS:
+                self._show_macos_notification(title, message, notification_type)
+                
+        except Exception as e:
+            print(f"Error showing desktop notification: {e}")
+    
+    def _show_linux_notification(self, title, message, notification_type):
+        """Show Linux desktop notification using notify-send"""
+        try:
+            urgency = 'normal'
+            if notification_type == 'warning':
+                urgency = 'normal'
+            elif notification_type == 'critical':
+                urgency = 'critical'
+            
+            # Use notify-send if available
+            subprocess.run([
+                'notify-send', 
+                '--urgency', urgency,
+                '--icon', 'battery',
+                '--app-name', 'BattMon',
+                '--expire-time', str(self.user_profile.get('notification_timeout', 5000)),
+                title, 
+                message
+            ], capture_output=True, timeout=2)
+            
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # notify-send not available, Qt notification is sufficient
+            pass
+        except Exception as e:
+            print(f"Linux notification error: {e}")
+    
+    def _show_windows_notification(self, title, message, notification_type):
+        """Show Windows desktop notification using Windows toast"""
+        try:
+            # For now, rely on Qt's built-in notification
+            # Future enhancement: Use Windows 10+ toast notifications via win10toast
+            pass
+        except Exception as e:
+            print(f"Windows notification error: {e}")
+    
+    def _show_macos_notification(self, title, message, notification_type):
+        """Show macOS desktop notification using osascript"""
+        try:
+            # Use AppleScript to show native macOS notification
+            script = f'''
+            display notification "{message}" with title "BattMon" subtitle "{title}"
+            '''
+            subprocess.run(['osascript', '-e', script], capture_output=True, timeout=2)
+            
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # osascript not available, Qt notification is sufficient
+            pass
+        except Exception as e:
+            print(f"macOS notification error: {e}")
+    
+    def check_milestone_notifications(self, percentage, is_charging):
+        """Check and trigger milestone notifications"""
+        if not self.notifications_enabled:
+            return
+        
+        if is_charging:
+            # Check charging milestones (ascending order)
+            for milestone in self.charging_milestones:
+                if (percentage >= milestone and 
+                    (self.last_charging_milestone is None or self.last_charging_milestone < milestone)):
+                    
+                    # Determine notification type and message
+                    if milestone == 100:
+                        title = "🔋 Battery Fully Charged"
+                        message = "Battery is now 100% charged. You can unplug the charger."
+                        notification_type = 'info'
+                    elif milestone >= 75:
+                        title = "🔋 Battery Almost Full"
+                        message = f"Battery charged to {percentage}% ({milestone}% milestone reached)"
+                        notification_type = 'info'
+                    else:
+                        title = "🔋 Battery Charging"
+                        message = f"Battery charged to {percentage}% ({milestone}% milestone reached)"
+                        notification_type = 'info'
+                    
+                    self.show_desktop_notification(title, message, notification_type)
+                    self.last_charging_milestone = milestone
+                    
+                    # Play notification sound if enabled
+                    if self.user_profile.get('play_sound', True):
+                        self.alert_beep(1)
+                    
+                    break
+        else:
+            # Check discharge milestones (descending order)
+            for milestone in self.milestone_thresholds:
+                if (percentage <= milestone and 
+                    (self.last_milestone_triggered is None or self.last_milestone_triggered > milestone)):
+                    
+                    # Determine notification type and message based on battery level
+                    if milestone <= 10:
+                        title = "🔴 Critical Battery Level"
+                        message = f"Battery critically low at {percentage}%! Please charge immediately to avoid data loss."
+                        notification_type = 'critical'
+                    elif milestone <= 20:
+                        title = "🟠 Low Battery Warning"
+                        message = f"Battery low at {percentage}%. Please connect charger soon."
+                        notification_type = 'warning'
+                    elif milestone <= 30:
+                        title = "🟡 Battery Getting Low"
+                        message = f"Battery at {percentage}%. Consider charging soon."
+                        notification_type = 'warning'
+                    else:
+                        title = "🔋 Battery Milestone"
+                        message = f"Battery level: {percentage}% ({milestone}% milestone)"
+                        notification_type = 'info'
+                    
+                    self.show_desktop_notification(title, message, notification_type)
+                    self.last_milestone_triggered = milestone
+                    
+                    # Play notification sound if enabled (more urgent = more beeps)
+                    if self.user_profile.get('play_sound', True):
+                        if milestone <= 10:
+                            self.alert_beep(3)  # Critical - 3 beeps
+                        elif milestone <= 20:
+                            self.alert_beep(2)  # Low - 2 beeps
+                        else:
+                            self.alert_beep(1)  # Normal - 1 beep
+                    
+                    break
+            
+            # Reset charging milestone when not charging
+            if self.last_charging_milestone is not None:
+                self.last_charging_milestone = None
+    
+    def show_startup_notification(self):
+        """Show startup notification with configured milestone thresholds"""
+        try:
+            # Get current battery info for context
+            info = self.get_battery_info()
+            current_percentage = info.get('percentage', 0)
+            current_state = info.get('state', 'Unknown')
+            
+            # Format milestone thresholds for display
+            discharge_thresholds = ', '.join([f"{t}%" for t in sorted(self.milestone_thresholds, reverse=True)])
+            charging_thresholds = ', '.join([f"{t}%" for t in sorted(self.charging_milestones)])
+            
+            # Create informative startup message
+            title = "🔋 BattMon Started - Desktop Notifications Active"
+            
+            message = (
+                f"Battery monitoring active! Current: {current_percentage}% ({current_state})\n\n"
+                f"📉 Discharge alerts at: {discharge_thresholds}\n"
+                f"📈 Charging alerts at: {charging_thresholds}\n\n"
+                f"🔔 Notifications: {'Enabled' if self.notifications_enabled else 'Disabled'}\n"
+                f"🔊 Sound alerts: {'Enabled' if self.user_profile.get('play_sound', True) else 'Disabled'}"
+            )
+            
+            # Show the startup notification
+            self.show_desktop_notification(title, message, 'info')
+            
+            # Also print to console
+            print(f"Desktop notifications configured:")
+            print(f"  Discharge milestones: {discharge_thresholds}")
+            print(f"  Charging milestones: {charging_thresholds}")
+            print(f"  Notifications: {'ON' if self.notifications_enabled else 'OFF'}")
+            print(f"  Sound alerts: {'ON' if self.user_profile.get('play_sound', True) else 'OFF'}")
+            
+        except Exception as e:
+            print(f"Error showing startup notification: {e}")
     
     def get_battery_info(self):
         """Get battery information using OS-appropriate method"""
@@ -848,6 +1130,9 @@ License: GPL v2+</p>
         # Update battery window if it's open
         if self.battery_widget and self.battery_widget.isVisible():
             self.battery_widget.update_battery_info(info)
+        
+        # Check for milestone notifications
+        self.check_milestone_notifications(percentage, is_charging)
         
         # Beep when percentage decreases by 1 (or more) since last tick while NOT charging
         # This uses last_seen_percent so it works across state transitions.

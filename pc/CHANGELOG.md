@@ -7,6 +7,80 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.6] - 2025-08-14 03:05:00 CDT
+
+### Added - Smart Desktop Notifications System 🔔
+- **Configurable Milestone Notifications**: User-friendly battery milestone alerts with cross-platform desktop notifications
+  - **Default Discharge Alerts**: 90%, 80%, 70%, 60%, 50%, 40%, 30%, 20%, 10% battery levels
+  - **Default Charging Alerts**: 25%, 50%, 75%, 90%, 100% charge levels  
+  - **Smart Messaging**: Context-aware notification titles and messages based on battery level urgency
+  - **Cross-Platform Support**: Native desktop notifications on Linux (notify-send), Windows (system tray), and macOS (osascript)
+  - **User Profile Storage**: Persistent configuration saved in `~/.config/battmon/profile.json`
+
+- **Enhanced User Interface**: New menu options for notification management
+  - **"🔔 Show Notification Settings"**: On-demand display of current milestone configuration
+  - **Startup Notification**: Automatic display of configured thresholds when application starts
+  - **Current Battery Context**: Notifications show current battery percentage and state for reference
+
+### Desktop Notification Features
+- **Multi-Level Alert System**: Different notification types based on battery level severity
+  - **🔴 Critical (≤10%)**: "Battery critically low! Please charge immediately to avoid data loss."
+  - **🟠 Warning (≤20%)**: "Battery low. Please connect charger soon."
+  - **🟡 Caution (≤30%)**: "Battery getting low. Consider charging soon."
+  - **🔋 Normal (>30%)**: Standard milestone notifications
+  - **🔋 Charging**: Positive charging milestone notifications with progress updates
+
+- **Smart Audio Integration**: Enhanced sound alerts synchronized with notifications
+  - **Critical Alerts (≤10%)**: 3 system beeps for maximum urgency
+  - **Warning Alerts (≤20%)**: 2 system beeps for high attention
+  - **Normal Alerts (>20%)**: 1 system beep for standard notification
+  - **Charging Alerts**: Single confirmation beep for charging milestones
+
+### Technical Implementation
+- **Cross-Platform Notification Engine**: Unified desktop notification system
+  - **Linux**: Uses `notify-send` with battery icons and configurable urgency levels
+  - **Windows**: System tray notifications with Qt6 integration (future Windows Toast enhancement planned)
+  - **macOS**: Native AppleScript notifications with system integration
+  - **Fallback**: Qt6 system tray notifications work across all platforms
+
+- **User Profile Management**: Robust configuration system
+  - **JSON Storage**: Human-readable configuration in standard OS config directories
+  - **Cross-Platform Paths**: Windows (`%APPDATA%/BattMon`), Linux/macOS (`~/.config/battmon`)
+  - **Automatic Migration**: Seamlessly handles profile updates and missing configuration keys
+  - **Version Tracking**: Profile versioning for future compatibility
+
+### User Experience Improvements
+- **Startup Transparency**: Users immediately see their configured notification thresholds
+- **On-Demand Access**: Right-click menu provides instant access to notification settings
+- **Visual Consistency**: Emoji icons (🔋📉📈🔔🔊) provide clear visual context
+- **Professional Messages**: Well-formatted notifications with clear action guidance
+- **Non-Intrusive**: 5-second notification timeout with user-configurable options
+
+### Configuration Details
+- **Default Profile Settings**:
+  ```json
+  {
+    "milestone_thresholds": [90, 80, 70, 60, 50, 40, 30, 20, 10],
+    "charging_milestones": [25, 50, 75, 90, 100],
+    "notifications_enabled": true,
+    "notification_timeout": 5000,
+    "play_sound": true,
+    "version": "0.5.6"
+  }
+  ```
+- **Milestone Logic**: Discharge alerts trigger on reaching or going below thresholds; charging alerts trigger on reaching or exceeding thresholds
+- **Anti-Spam Protection**: Prevents duplicate notifications for the same milestone
+- **State-Aware**: Separate tracking for charging vs. discharging milestone states
+
+### Key Benefits
+- ✅ **Enhanced User Awareness**: Proactive battery level notifications keep users informed
+- ✅ **Configurable Experience**: User-controlled notification thresholds and preferences
+- ✅ **Cross-Platform Consistency**: Unified notification behavior across all supported operating systems
+- ✅ **Professional Integration**: Native OS notification systems with proper urgency handling
+- ✅ **Battery Intelligence**: Context-aware messaging based on battery level and charging state
+- ✅ **Data Loss Prevention**: Critical alerts help prevent unexpected shutdowns
+- ✅ **Accessibility**: Audio + visual notifications support users with different needs
+
 ## [0.5.5] - 2025-08-14 01:40:00 CDT
 
 ### Added - GitHub Integration Links 🔗
