@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.4 - A Qt6-based cross-platform version with audio alerts
+Version 0.5.5 - A Qt6-based cross-platform version with audio alerts
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.4'
+VERSION = '0.5.5'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -254,8 +254,8 @@ class BattMonCrossPlatform(QWidget):
         self.pulse_opacity = 1.0
         self.pulse_direction = -0.3  # Fade direction and speed
         self.pulse_timer = None
-        # Disable pulse beeps so only 1% step beeps are heard
-        self.beep_with_pulse = False  # Enable/disable beeps with pulsing
+        # Enable pulse beeps and 1% step beeps for debugging
+        self.beep_with_pulse = True  # Enable/disable beeps with pulsing
         
         # Create system tray icon
         self.tray_icon = QSystemTrayIcon(self)
@@ -357,7 +357,12 @@ class BattMonCrossPlatform(QWidget):
 
 
 <p>Developed with Python 3 + PyQt6<br>
-License: GPL v2+</p>"""
+License: GPL v2+</p>
+
+<p style="margin-top: 10px; text-align: center;">
+📖 <a href="https://github.com/juren53/BattMon" target="_blank">View project on GitHub</a><br>
+📋 <a href="https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md" target="_blank">View changelog</a>
+</p>"""
         
         msg_box = QMessageBox()
         msg_box.setWindowTitle("About BattMon Cross-Platform")
@@ -610,16 +615,30 @@ License: GPL v2+</p>"""
     def alert_beep(self, times: int = 1):
         """Cross-platform short beep N times (separate from pulsing)."""
         system = platform.system().lower()
-        for _ in range(max(1, times)):
+        
+        for i in range(max(1, times)):
             if system == 'windows':
                 try:
                     import winsound
-                    winsound.Beep(880, 120)
+                    # Use Windows system WAV sounds - these work when beeps are disabled
+                    if i == 0:  # First beep - use warning sound
+                        winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+                    else:  # Subsequent beeps - use default
+                        winsound.PlaySound("SystemDefault", winsound.SND_ALIAS)
                 except Exception:
                     try:
-                        os.system('echo \a')
+                        # Fallback to MessageBeep
+                        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
                     except Exception:
-                        pass
+                        try:
+                            # Fallback to raw beep
+                            winsound.Beep(880, 120)
+                        except Exception:
+                            try:
+                                # Final fallback
+                                os.system('echo \a')
+                            except Exception:
+                                pass
             else:
                 try:
                     subprocess.run(['play', '-nq', 'synth', '0.12', 'sine', '880'],

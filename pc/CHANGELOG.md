@@ -2,10 +2,76 @@
 
 All notable changes to BattMon PC will be documented in this file.
 
+📖 **[View this changelog on GitHub](https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md)**
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.4] - 2025-08-13 22:35:00 CDT
+## [0.5.5] - 2025-08-14 01:40:00 CDT
+
+### Added - GitHub Integration Links 🔗
+- **Enhanced Documentation Access**: Added direct GitHub links to improve user experience
+  - **About Dialog Links**: Added prominent GitHub repository and changelog links at the bottom of the About dialog
+  - **CHANGELOG.md Link**: Added GitHub link at the top of the changelog for easy web viewing
+  - **User-Friendly Navigation**: Both links open in new tabs for seamless browsing
+  - **Professional Presentation**: Links styled with emojis (📖 📋) and centered alignment
+
+### User Experience Improvements
+- **Easy Repository Access**: Users can quickly navigate to the main GitHub project page from the About dialog
+- **Direct Changelog Access**: One-click access to the full changelog with proper GitHub markdown rendering
+- **Improved Documentation Flow**: Seamless transition between application and online documentation
+- **Enhanced Discoverability**: GitHub links make it easier for users to find updates, contribute, or report issues
+
+### Technical Implementation
+- **Dual Link Integration**: Repository link and changelog link strategically placed in different locations
+- **Responsive Design**: Links maintain proper formatting across different dialog sizes
+- **Clean HTML Styling**: Professional appearance with proper spacing and visual hierarchy
+- **Cross-Platform Compatibility**: Links work correctly across all supported operating systems
+
+### Benefits
+- ✅ **Better User Engagement**: Easy access to project resources and documentation
+- ✅ **Improved Support**: Users can quickly access help resources and report issues
+- ✅ **Enhanced Transparency**: Direct access to changelog and development history
+- ✅ **Community Building**: Easier for users to discover and contribute to the project
+- ✅ **Professional Polish**: Cohesive integration between application and online presence
+
+## [0.5.4] - 2025-08-14 01:22:00 CDT
+
+### Fixed - Windows 11 Audio Beep Issue 🔧
+- **Windows System Sound Integration**: Fixed silent beeps on Windows 11 systems
+  - **Root Cause**: Windows 11 often has system beeps (winsound.Beep) and MessageBeep disabled by default
+  - **Solution**: Implemented Windows system WAV sound integration using winsound.PlaySound() 
+  - **Primary Method**: Uses "SystemExclamation" for warning alerts and "SystemDefault" for standard alerts
+  - **Fallback Chain**: WAV sounds → MessageBeep → Raw beeps → Echo beeps for maximum compatibility
+  - **Cross-Platform**: Linux and macOS beep functionality remains unchanged
+
+### Enhanced Windows Compatibility
+- **Audible Startup Beep**: Windows users now hear confirmation sound when battmon initializes
+- **Battery Drop Alerts**: 1%+ battery drops while discharging now produce audible alerts on Windows 11:
+  - Orange zone (30-49%): Single system sound alert  
+  - Red zone (0-29%): Double system sound alert
+- **System Integration**: Uses Windows' native UI sound system instead of raw beep generation
+- **Diagnostic Tools**: Added comprehensive Windows sound troubleshooter for future debugging
+
+### Developer Tools Added
+- **windows_sound_troubleshooter.py**: Comprehensive diagnostic tool for Windows audio issues
+  - Tests multiple Windows beep methods (winsound.Beep, MessageBeep, WAV sounds, PowerShell, echo)
+  - Identifies which sound methods work on specific Windows configurations
+  - Provides detailed troubleshooting guidance and system settings checks
+  - Automatically generates fixed beep implementations based on working methods
+- **battmon_beep_test.py**: Standalone test script using the working sound method
+
+### Technical Implementation
+- **Robust Audio Stack**: Multi-tier fallback system ensures audio alerts work across different Windows configurations
+- **System Sound API**: Leverages Windows' built-in system sounds for better reliability than raw beep generation
+- **Backwards Compatible**: All existing Linux/macOS functionality preserved
+- **Zero Dependencies**: No additional Windows audio libraries required
+
+### User Experience
+- **Reliable Audio Feedback**: Windows 11 users now get consistent audio alerts for battery events
+- **System Native**: Uses familiar Windows system sounds instead of generic beeps
+- **Troubleshooting Support**: Comprehensive diagnostic tools help resolve audio issues on any Windows system
+- **Cross-Platform Consistency**: Unified beep behavior now works reliably across all supported platforms
 
 ### Changed - Streamlined About Dialog 📄
 - **Simplified About Dialog**: Removed redundant sections from the About dialog
