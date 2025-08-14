@@ -14,7 +14,7 @@
 
 ## Getting Started
 
-BattMon Cross-Platform is a modern battery monitoring application that runs on Linux, Windows, and macOS. It provides real-time battery status monitoring through a system tray icon with customizable notifications and visual alerts.
+BattMon Cross-Platform is a battery monitoring application that runs on Linux, Windows, and macOS. It provides real-time battery status monitoring through a system tray icon with customizable on screen and audible notifications and alerts.
 
 ### First Launch
 When you start BattMon for the first time:
@@ -23,13 +23,13 @@ When you start BattMon for the first time:
 - The application runs continuously in the background
 
 ### Basic Usage
-- **Left-click** the tray icon to show the detailed battery window
+- **Left-click** the tray icon to show the detailed battery status window
 - **Right-click** the tray icon to access the context menu
-- The tray icon automatically updates to reflect the current battery 'state of charge'
+- The tray icon is dynamic and continuously updates to reflect the system's battery 'state of charge'
 
 ## System Tray
 
-The system tray icon is the primary interface with BattMon. It provides at-a-glance information about the battery status.
+The system tray icon is the primary interface with BattMon. It provides at-a-glance information about the battery status .
 
 ### Tray Icon Features
 - **Dynamic battery visualization**: Shows actual battery fill level
