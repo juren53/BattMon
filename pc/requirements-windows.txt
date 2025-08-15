@@ -1,17 +1,11 @@
-# BattMon Windows 11 Dependencies
+# BattMon Cross-Platform Windows Requirements
 # Install with: pip install -r requirements-windows.txt
 
-# Core cross-platform dependencies
-psutil>=5.8.0          # Battery status detection (cross-platform)
-pystray>=0.19.0        # System tray integration (cross-platform)
-Pillow>=8.0.0          # Image manipulation and icon generation
+# Core Qt6 dependencies
+PyQt6>=6.4.0
 
-# Optional Windows enhancements
-plyer>=2.0             # Cross-platform notifications
-pywin32>=304           # Windows API access (Windows only)
-wmi>=1.5.1             # Windows Management Instrumentation (Windows only)
-
-# Development and packaging
-configparser>=5.0.0    # Configuration file handling (built-in Python 3.2+)
-setuptools>=50.0.0     # Package building
-wheel>=0.36.0          # Package distribution
+# Optional Windows-specific enhancements for better battery information
+# Uncomment the following lines for enhanced features:
+# WMI>=1.5.1                    # Windows Management Instrumentation for detailed battery data
+# pywin32>=304                  # Windows API access for system integration
+# win10toast>=0.9               # Windows 10+ native toast notifications

@@ -1,6 +1,8 @@
 # BattMon Cross-Platform - Quick Installation Guide
 
-## 🚀 One-Command Installation (Linux)
+## 🚀 One-Command Installation
+
+### Linux
 
 For users who want to quickly install and run BattMon without cloning the entire repository:
 
@@ -150,10 +152,77 @@ curl -fsSL https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-lin
 
 The installer will download the latest files and update your installation.
 
+### Windows
+
+**PowerShell Installation (Recommended):**
+```powershell
+iex (iwr -UseBasicParsing https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.ps1).Content
+```
+
+**Python Installation (Alternative):**
+```cmd
+python -c "import urllib.request; exec(urllib.request.urlopen('https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.py').read())"
+```
+
+**Manual Download and Run:**
+```powershell
+# Download PowerShell installer
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.ps1" -OutFile "install-battmon.ps1"
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser  # If needed
+.\install-battmon.ps1
+```
+
+## ✨ What the Windows Installer Does
+
+The Windows installation script automatically:
+
+- **Detects Python installation** or offers to install via Windows Package Manager
+- **Installs PyQt6 and dependencies** via pip
+- **Downloads BattMon files** from GitHub (battmon.py, HELP.md)
+- **Creates launcher scripts** (batch and PowerShell)
+- **Sets up Start Menu shortcut** for easy access
+- **Optionally adds to PATH** for command-line access
+- **Tests the installation** to ensure everything works
+
+## 📦 What Gets Installed (Windows)
+
+### Files and Directories:
+- `%LOCALAPPDATA%\BattMon\` - Main application directory
+- `%LOCALAPPDATA%\BattMon\battmon.py` - Main application
+- `%LOCALAPPDATA%\BattMon\HELP.md` - Help documentation
+- `%LOCALAPPDATA%\BattMon\battmon.bat` - Batch launcher
+- `%LOCALAPPDATA%\BattMon\battmon.ps1` - PowerShell launcher
+- `%APPDATA%\Microsoft\Windows\Start Menu\Programs\BattMon Cross-Platform.lnk` - Start Menu shortcut
+
+### Dependencies:
+- Python 3.8+
+- PyQt6 (via pip)
+- Optional: WMI module for enhanced battery information
+
+## 🏃‍♂️ After Installation (Windows)
+
+### Run BattMon:
+- **Start Menu**: Search for "BattMon Cross-Platform"
+- **Command Prompt**: `python "%LOCALAPPDATA%\BattMon\battmon.py"`
+- **Batch file**: `"%LOCALAPPDATA%\BattMon\battmon.bat"`
+- **Double-click**: Navigate to `%LOCALAPPDATA%\BattMon\` and double-click `battmon.py`
+
+### Add to Startup (Windows):
+1. Press `Win + R`, type `shell:startup`, press Enter
+2. Create a shortcut to `%LOCALAPPDATA%\BattMon\battmon.bat`
+3. Or use Task Scheduler for more advanced startup options
+
+## 🔄 Updating BattMon (Windows)
+
+To update to the latest version, simply re-run the installer:
+
+```powershell
+iex (iwr -UseBasicParsing https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.ps1).Content
+```
+
 ## 🗑️ Uninstallation
 
-To remove BattMon:
-
+### Linux:
 ```bash
 rm -rf ~/.local/share/battmon
 rm -f ~/.local/bin/battmon
@@ -161,6 +230,17 @@ rm -f ~/.local/share/applications/battmon.desktop
 ```
 
 Then remove the PATH entry from your shell config files if desired.
+
+### Windows:
+```cmd
+# Remove application directory
+rmdir /s "%LOCALAPPDATA%\BattMon"
+
+# Remove Start Menu shortcut
+del "%APPDATA%\Microsoft\Windows\Start Menu\Programs\BattMon Cross-Platform.lnk"
+```
+
+Then remove the PATH entry from your user environment variables if added.
 
 ---
 
