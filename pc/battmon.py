@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.9 - Professional Help System with Clickable Links and GitHub-Style Documentation
+Version 0.5.10 - Enhanced Milestone Tracking with Professional Help System
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.9'
+VERSION = '0.5.10'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -211,11 +211,20 @@ class BattMonCrossPlatform(QWidget):
         
         # Desktop notifications system
         self.user_profile = self.load_user_profile()
+        
+        # Sleep mode detection - detect when system wakes up from sleep
+        self.last_update_time = time.time()
+        self.sleep_threshold = self.user_profile.get('sleep_threshold', 300)  # seconds - consider system was asleep if gap > 5 minutes
+        self.sleep_notifications_enabled = self.user_profile.get('sleep_notifications_enabled', True)
+        self.was_asleep = False
         self.milestone_thresholds = self.user_profile.get('milestone_thresholds', [90, 80, 70, 60, 50, 40, 30, 20, 10])
         self.charging_milestones = self.user_profile.get('charging_milestones', [25, 50, 75, 90, 100])
         self.notifications_enabled = self.user_profile.get('notifications_enabled', True)
         self.last_milestone_triggered = None  # Track last milestone to prevent spam
         self.last_charging_milestone = None  # Track charging milestones separately
+        
+        # Initialize milestone tracking based on current battery level to prevent startup cascade
+        self._initialize_milestone_tracking = True  # Flag to initialize on first update
         
         # Pulsing animation state
         self.pulse_opacity = 1.0
@@ -895,6 +904,8 @@ License: GPL v2+</p>
             'notifications_enabled': True,
             'notification_timeout': 5000,  # milliseconds
             'play_sound': True,
+            'sleep_notifications_enabled': True,  # Enable sleep/wake notifications
+            'sleep_threshold': 300,  # seconds - consider system was asleep if gap > 5 minutes
             'version': VERSION
         }
         
@@ -999,11 +1010,132 @@ License: GPL v2+</p>
             print(f"Linux notification error: {e}")
     
     def _show_windows_notification(self, title, message, notification_type):
-        """Show Windows desktop notification using Windows toast"""
+        """Show Windows desktop notification using multiple methods"""
         try:
-            # For now, rely on Qt's built-in notification
-            # Future enhancement: Use Windows 10+ toast notifications via win10toast
-            pass
+            # Method 1: Use PowerShell to show Windows 10/11 toast notifications (most reliable)
+            try:
+                # Create PowerShell script for native Windows toast
+                # Escape any quotes in the title and message for PowerShell
+                title_escaped = title.replace('"', '`"').replace("'", "`'")
+                message_escaped = message.replace('"', '`"').replace("'", "`'")
+                
+                ps_script = f'''
+Add-Type -AssemblyName System.Windows.Forms
+[System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms") | Out-Null
+
+# Try to use Windows 10+ toast notifications
+try {{
+    Add-Type -AssemblyName Windows.UI
+    Add-Type -AssemblyName Windows.Data
+    
+    $template = @"
+<toast>
+    <visual>
+        <binding template="ToastGeneric">
+            <text>{title_escaped}</text>
+            <text>{message_escaped}</text>
+        </binding>
+    </visual>
+</toast>
+"@
+
+    $xml = New-Object Windows.Data.Xml.Dom.XmlDocument
+    $xml.LoadXml($template)
+    $toast = New-Object Windows.UI.Notifications.ToastNotification $xml
+    $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("BattMon")
+    $notifier.Show($toast)
+    Write-Output "Toast notification sent successfully"
+}} catch {{
+    # Fallback to balloon tip
+    try {{
+        Add-Type -AssemblyName System.Windows.Forms
+        $balloon = New-Object System.Windows.Forms.NotifyIcon
+        $balloon.Icon = [System.Drawing.SystemIcons]::Information
+        $balloon.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Info
+        $balloon.BalloonTipTitle = "{title_escaped}"
+        $balloon.BalloonTipText = "{message_escaped}"
+        $balloon.Visible = $true
+        $balloon.ShowBalloonTip(5000)
+        Start-Sleep -Seconds 1
+        $balloon.Visible = $false
+        $balloon.Dispose()
+        Write-Output "Balloon notification sent successfully"
+    }} catch {{
+        # Final fallback - simple message box
+        [System.Windows.Forms.MessageBox]::Show("{message_escaped}", "{title_escaped}", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+        Write-Output "MessageBox shown successfully"
+    }}
+}}
+'''
+                
+                # Execute PowerShell script
+                result = subprocess.run(
+                    ["powershell", "-WindowStyle", "Hidden", "-Command", ps_script],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                
+                if result.returncode == 0:
+                    print(f"[DEBUG] PowerShell notification success: {result.stdout.strip()}")
+                    return  # Success
+                else:
+                    print(f"[DEBUG] PowerShell notification failed: {result.stderr}")
+                    
+            except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+                print(f"[DEBUG] PowerShell method failed: {e}")
+                pass
+            
+            # Method 2: Try win10toast library if available
+            try:
+                from win10toast import ToastNotifier
+                toaster = ToastNotifier()
+                
+                # Determine icon based on notification type
+                icon_path = None  # Will use default app icon
+                duration = 10 if notification_type == 'critical' else 5
+                
+                toaster.show_toast(
+                    title=title,
+                    msg=message,
+                    icon_path=icon_path,
+                    duration=duration,
+                    threaded=True  # Non-blocking
+                )
+                print(f"[DEBUG] win10toast notification sent successfully")
+                return  # Success - exit function
+            except Exception as toast_error:
+                print(f"[DEBUG] win10toast failed: {toast_error}")
+                pass
+            
+            # Method 3: Use Windows API via ctypes (fallback)
+            try:
+                import ctypes
+                from ctypes import wintypes
+                
+                # Show a simple Windows message box as fallback
+                MB_OK = 0x0
+                MB_ICONINFORMATION = 0x40
+                MB_ICONWARNING = 0x30
+                MB_ICONERROR = 0x10
+                
+                icon_type = MB_ICONINFORMATION
+                if notification_type == 'warning':
+                    icon_type = MB_ICONWARNING
+                elif notification_type == 'critical':
+                    icon_type = MB_ICONERROR
+                
+                # Non-blocking message box
+                def show_msgbox():
+                    ctypes.windll.user32.MessageBoxW(0, message, title, icon_type | MB_OK)
+                
+                import threading
+                threading.Thread(target=show_msgbox, daemon=True).start()
+                
+            except Exception as fallback_error:
+                print(f"[DEBUG] Windows API fallback failed: {fallback_error}")
+                pass
+                
         except Exception as e:
             print(f"Windows notification error: {e}")
     
@@ -1132,6 +1264,60 @@ License: GPL v2+</p>
             
         except Exception as e:
             print(f"Error showing startup notification: {e}")
+    
+    def show_wake_up_notification(self):
+        """Show notification when system wakes up from sleep mode"""
+        try:
+            # Get current battery info after waking up
+            info = self.get_battery_info()
+            current_percentage = info.get('percentage', 0)
+            current_state = info.get('state', 'Unknown')
+            is_charging = info.get('state', '').lower() in ('charging', 'full')
+            time_remaining = info.get('time', '')
+            
+            # Get current time for context
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            
+            # Create wake-up notification with battery status
+            title = "💻 System Wake-Up - BattMon Active"
+            
+            charging_info = " (Charging ⚡)" if is_charging else " (On Battery)"
+            time_info = f"\nTime Remaining: {time_remaining}" if time_remaining else ""
+            
+            message = (
+                f"Welcome back! System resumed at {current_time}\n\n"
+                f"🔋 Current Battery: {current_percentage}% ({current_state}){charging_info}{time_info}\n\n"
+                f"Battery monitoring has resumed automatically."
+            )
+            
+            # Determine notification type based on battery level
+            if current_percentage <= 20 and not is_charging:
+                notification_type = 'warning'
+                title = "⚠️ System Wake-Up - Low Battery Warning"
+            elif current_percentage <= 10 and not is_charging:
+                notification_type = 'critical'
+                title = "🔴 System Wake-Up - Critical Battery Level"
+            else:
+                notification_type = 'info'
+            
+            # Show the wake-up notification
+            self.show_desktop_notification(title, message, notification_type)
+            
+            # Play notification sound if enabled
+            if self.user_profile.get('play_sound', True):
+                if current_percentage <= 10 and not is_charging:
+                    self.alert_beep(3)  # Critical - 3 beeps
+                elif current_percentage <= 20 and not is_charging:
+                    self.alert_beep(2)  # Warning - 2 beeps
+                else:
+                    self.alert_beep(1)  # Normal wake-up - 1 beep
+            
+            # Also print to console
+            print(f"[WAKE-UP] System resumed at {current_time}")
+            print(f"[WAKE-UP] Battery: {current_percentage}% ({current_state}){charging_info}")
+            
+        except Exception as e:
+            print(f"Error showing wake-up notification: {e}")
     
     def get_battery_info(self):
         """Get battery information using OS-appropriate method"""
@@ -1845,10 +2031,62 @@ License: GPL v2+</p>
     
     def update_battery(self):
         """Update battery status and icon"""
+        current_time = time.time()
+        
+        # Sleep mode detection - check if there's been a significant time gap
+        time_gap = current_time - self.last_update_time
+        
+        # If gap is greater than our threshold, system likely woke from sleep
+        if (self.sleep_notifications_enabled and 
+            time_gap > self.sleep_threshold and 
+            not self.was_asleep):
+            print(f"[SLEEP] Detected sleep mode wake-up. Time gap: {time_gap:.1f} seconds")
+            self.was_asleep = True
+            # Show wake-up notification
+            self.show_wake_up_notification()
+        elif time_gap <= self.sleep_threshold:
+            # Normal update interval - reset sleep flag if it was set
+            self.was_asleep = False
+        
+        # Update the last update time for next detection
+        self.last_update_time = current_time
+        
         info = self.get_battery_info()
         percentage = info['percentage']
         state = info['state']
         is_charging = info['state'] not in ('Discharging', 'Full', 'Unknown')
+        
+        # Initialize milestone tracking on first update to prevent startup cascade
+        if hasattr(self, '_initialize_milestone_tracking') and self._initialize_milestone_tracking:
+            print(f"[INIT] Initializing milestone tracking at {percentage}% to prevent startup cascade")
+            
+            # For discharge milestones, set the last triggered to the nearest milestone at or below current level
+            # This prevents notifications for milestones that are at or below the current level
+            if not is_charging:
+                # Find the highest milestone that is <= current percentage
+                for milestone in sorted(self.milestone_thresholds, reverse=True):
+                    if milestone <= percentage:
+                        self.last_milestone_triggered = milestone
+                        print(f"[INIT] Set last_milestone_triggered to {milestone}% (current: {percentage}%)")
+                        break
+                # If no milestone is <= current percentage, set to None (all milestones are above current level)
+                if self.last_milestone_triggered is None:
+                    print(f"[INIT] All discharge milestones are above {percentage}%, leaving last_milestone_triggered as None")
+            
+            # For charging milestones, set to the highest milestone at or below current level
+            if is_charging:
+                # Find the highest milestone that is <= current percentage
+                for milestone in sorted(self.charging_milestones, reverse=True):
+                    if milestone <= percentage:
+                        self.last_charging_milestone = milestone
+                        print(f"[INIT] Set last_charging_milestone to {milestone}% (current: {percentage}%)")
+                        break
+                # If no milestone is <= current percentage, set to None (all milestones are above current level)
+                if self.last_charging_milestone is None:
+                    print(f"[INIT] All charging milestones are above {percentage}%, leaving last_charging_milestone as None")
+            
+            # Remove the initialization flag
+            delattr(self, '_initialize_milestone_tracking')
         
         # Check if we should show a notification
         show_message = False

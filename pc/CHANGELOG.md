@@ -65,6 +65,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ **Resource Access**: Direct access to changelog and issue tracking for better user support
 - ✅ **Modern UI Framework**: Qt6 QTextBrowser provides superior hyperlink handling
 
+## [0.5.10] - 2025-08-16 16:10:00 CDT
+
+### Fixed - Milestone Notification Startup Cascade 🔧
+- **Smart Milestone Initialization**: Prevented multiple milestone notifications on application startup
+  - **Root Cause**: Milestone tracking variables (`last_milestone_triggered` and `last_charging_milestone`) were initialized as `None`, causing all milestones above current battery level to trigger notifications on first update
+  - **Solution**: Added `_initialize_milestone_tracking` flag to properly initialize milestone tracking on first battery update
+  - **Corrected Logic**: Fixed initialization to find the **highest** milestone ≤ current battery level
+  - **Debug Logging**: Added informative console output to track initialization process for troubleshooting
+
+### Milestone Tracking Improvements
+- **Startup Intelligence**: Application now intelligently initializes milestone tracking based on current battery state
+  - Example: Battery at 59% on startup sets `last_milestone_triggered` to 50%, preventing notifications for 90%, 80%, 70%, 60%, 50%
+  - Example: Battery at 85% charging sets `last_charging_milestone` to 75%, preventing notifications for 25%, 50%, 75%
+- **One-Time Initialization**: Flag is automatically removed after first update to ensure initialization only happens once
+- **State-Aware Logic**: Different initialization logic for charging vs. discharging states
+- **Preserved Functionality**: All existing milestone notification behavior maintained for future battery level changes
+
+### User Experience Benefits
+- **Clean Startup**: Users no longer receive multiple unwanted notifications when BattMon starts
+- **Logical Behavior**: Milestone notifications now only trigger for actual battery level changes, not startup conditions
+- **Maintained Accuracy**: All configured milestone thresholds remain active and functional for real battery transitions
+- **Debug Transparency**: Console output shows initialization process for troubleshooting milestone issues
+
+### Technical Implementation
+- **Constructor Flag**: Added `_initialize_milestone_tracking = True` flag in class constructor
+- **First Update Logic**: Enhanced `update_battery()` method to check and handle initialization flag
+- **Corrected Algorithm**: Fixed initialization to set milestone tracking to the **highest** milestone ≤ current battery level
+  - **Discharge Logic**: `milestone <= percentage` ensures only lower milestones will trigger notifications
+  - **Charging Logic**: `milestone <= percentage` ensures only higher milestones will trigger notifications
+- **Automatic Cleanup**: Flag is removed via `delattr()` after successful initialization
+- **Backward Compatibility**: No changes to user configuration or existing milestone functionality
+
+### Key Benefits
+- ✅ **Fixed Critical Bug**: Eliminates annoying multiple notifications on application startup
+- ✅ **Improved User Experience**: Clean, professional startup behavior
+- ✅ **Preserved Functionality**: All milestone notifications work exactly as intended for actual battery changes
+- ✅ **Smart Logic**: Initialization adapts to current battery level and charging state
+- ✅ **Debug Support**: Console logging helps troubleshoot any milestone issues
+
 ## [0.5.8] - 2025-08-14 14:06:42 CDT
 
 ### Added - Comprehensive Cross-Platform Installation System 💿
