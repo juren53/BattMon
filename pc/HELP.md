@@ -197,9 +197,9 @@ BattMon adapts to each operating system's conventions and capabilities.
 If you encounter issues not covered here:
 
 1. **Check the GitHub Issues**: [https://github.com/juren53/BattMon/issues](https://github.com/juren53/BattMon/issues)
-2. **Review the changelog**: See `CHANGELOG.md` for recent changes
+2. **Review the changelog**: [CHANGELOG.md](https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md) for recent changes and version history
 3. **Check system requirements**: Ensure PyQt6 is properly installed
-4. **File a bug report**: Include the OS, Python version, and error details
+4. **File a bug report**: Use the project's [GitHub Issues](https://github.com/juren53/BattMon/issues) page and include the OS, Python version, and error details
 
 ## FAQ
 

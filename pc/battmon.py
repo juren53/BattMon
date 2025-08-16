@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.8 - Enhanced Battery Status Window with comprehensive health info and modern styling
+Version 0.5.9 - Professional Help System with Clickable Links and GitHub-Style Documentation
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import datetime
 import io
 import time
 import json
+import re
 
 try:
     from PyQt6.QtWidgets import (QApplication, QSystemTrayIcon, QMenu, QMessageBox, 
@@ -36,7 +37,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.8'
+VERSION = '0.5.9'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -301,6 +302,147 @@ class BattMonCrossPlatform(QWidget):
         """Show the battery information window"""
         show_battery_window_dialog(self)
     
+    def markdown_to_html(self, markdown_text):
+        """Convert Markdown text to HTML using proper markdown library for GitHub-like rendering"""
+        try:
+            # Try to use the markdown library for proper conversion
+            import markdown
+            
+            # Configure markdown with extensions for better GitHub-like rendering
+            md = markdown.Markdown(
+                extensions=[
+                    'markdown.extensions.tables',     # For table support
+                    'markdown.extensions.fenced_code', # For ```code blocks```
+                    'markdown.extensions.codehilite',  # For syntax highlighting
+                    'markdown.extensions.toc',         # For table of contents
+                    'markdown.extensions.nl2br',       # For line break handling
+                ],
+                extension_configs={
+                    'codehilite': {
+                        'css_class': 'highlight',
+                        'use_pygments': False,  # Use CSS for highlighting instead
+                    }
+                }
+            )
+            
+            # Convert markdown to HTML
+            html_content = md.convert(markdown_text)
+            return html_content
+            
+        except ImportError:
+            print("[DEBUG] markdown library not found, using basic converter")
+            # Fallback to basic conversion if markdown library is not available
+            return self._basic_markdown_to_html(markdown_text)
+        except Exception as e:
+            print(f"[DEBUG] Error using markdown library: {e}, falling back to basic converter")
+            return self._basic_markdown_to_html(markdown_text)
+    
+    def _basic_markdown_to_html(self, markdown_text):
+        """Basic Markdown to HTML converter as fallback"""
+        html = markdown_text
+        
+        # Convert headers
+        html = re.sub(r'^### (.*?)$', r'<h3>\1</h3>', html, flags=re.MULTILINE)
+        html = re.sub(r'^## (.*?)$', r'<h2>\1</h2>', html, flags=re.MULTILINE)
+        html = re.sub(r'^# (.*?)$', r'<h1>\1</h1>', html, flags=re.MULTILINE)
+        
+        # Convert bold text
+        html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
+        
+        # Convert italic text
+        html = re.sub(r'\*(.*?)\*', r'<em>\1</em>', html)
+        
+        # Convert inline code
+        html = re.sub(r'`([^`]+)`', r'<code>\1</code>', html)
+        
+        # Convert code blocks
+        html = re.sub(r'^```.*?\n(.*?)^```', r'<pre><code>\1</code></pre>', html, flags=re.MULTILINE | re.DOTALL)
+        
+        # Convert bullet points
+        lines = html.split('\n')
+        in_list = False
+        result_lines = []
+        
+        for line in lines:
+            if line.strip().startswith('- '):
+                if not in_list:
+                    result_lines.append('<ul>')
+                    in_list = True
+                item_text = line.strip()[2:].strip()
+                result_lines.append(f'<li>{item_text}</li>')
+            else:
+                if in_list:
+                    result_lines.append('</ul>')
+                    in_list = False
+                result_lines.append(line)
+        
+        if in_list:
+            result_lines.append('</ul>')
+        
+        html = '\n'.join(result_lines)
+        
+        # Convert table headers and rows
+        lines = html.split('\n')
+        result_lines = []
+        in_table = False
+        
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            
+            # Check for table header pattern
+            if '|' in line and i + 1 < len(lines) and '---' in lines[i + 1]:
+                if not in_table:
+                    result_lines.append('<table>')
+                    in_table = True
+                
+                # Process header
+                cells = [cell.strip() for cell in line.split('|') if cell.strip()]
+                if cells:
+                    result_lines.append('<thead><tr>')
+                    for cell in cells:
+                        result_lines.append(f'<th>{cell}</th>')
+                    result_lines.append('</tr></thead><tbody>')
+                
+                # Skip the separator line
+                i += 2
+                continue
+            elif in_table and '|' in line and line.strip():
+                # Process table row
+                cells = [cell.strip() for cell in line.split('|') if cell.strip()]
+                if cells:
+                    result_lines.append('<tr>')
+                    for cell in cells:
+                        result_lines.append(f'<td>{cell}</td>')
+                    result_lines.append('</tr>')
+            else:
+                if in_table and not ('|' in line):
+                    result_lines.append('</tbody></table>')
+                    in_table = False
+                result_lines.append(line)
+            
+            i += 1
+        
+        if in_table:
+            result_lines.append('</tbody></table>')
+        
+        html = '\n'.join(result_lines)
+        
+        # Convert links
+        html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank">\1</a>', html)
+        
+        # Convert paragraphs
+        paragraphs = html.split('\n\n')
+        html_paragraphs = []
+        for p in paragraphs:
+            p = p.strip()
+            if p and not p.startswith('<'):
+                html_paragraphs.append(f'<p>{p.replace(chr(10), "<br>")}</p>')
+            else:
+                html_paragraphs.append(p)
+        
+        return '\n\n'.join(html_paragraphs)
+    
     def show_help(self):
         """Show help documentation"""
         try:
@@ -311,35 +453,39 @@ class BattMonCrossPlatform(QWidget):
             
             if os.path.exists(help_file_path):
                 with open(help_file_path, 'r', encoding='utf-8') as f:
-                    help_content = f.read()
-                print(f"[DEBUG] Content length: {len(help_content)} characters")
-                print(f"[DEBUG] First 50 chars: {repr(help_content[:50])}")
+                    markdown_content = f.read()
+                print(f"[DEBUG] Content length: {len(markdown_content)} characters")
                 
-                # Create a help window/dialog to display the markdown content
-                from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextEdit, QPushButton, QHBoxLayout
+                # Convert Markdown to HTML
+                html_content = self.markdown_to_html(markdown_content)
+                print(f"[DEBUG] HTML content length: {len(html_content)} characters")
+                
+                # Create a help window/dialog to display the HTML content
+                from PyQt6.QtWidgets import QDialog, QVBoxLayout, QTextBrowser, QPushButton, QHBoxLayout
                 from PyQt6.QtCore import QSize
                 
                 help_dialog = QDialog()
                 help_dialog.setWindowTitle("BattMon Cross-Platform - Help")
-                help_dialog.setMinimumSize(QSize(800, 600))
-                help_dialog.resize(QSize(900, 700))
+                help_dialog.setMinimumSize(QSize(900, 700))
+                help_dialog.resize(QSize(1000, 800))
                 
                 # Set dialog icon
                 help_dialog.setWindowIcon(QIcon(self.create_battery_icon(75, False).pixmap(32, 32)))
                 
-                # Dark theme for the entire dialog
+                # Dark theme for the entire dialog to match About window
                 help_dialog.setStyleSheet("""
                     QDialog {
-                        background-color: #1e1e1e;
-                        color: #e8e8e8;
+                        background-color: #2b2b2b;
+                        color: #e0e0e0;
                     }
                     QPushButton {
                         background-color: #404040;
-                        color: #e8e8e8;
+                        color: #e0e0e0;
                         border: 1px solid #606060;
                         border-radius: 4px;
-                        padding: 8px 16px;
+                        padding: 10px 20px;
                         font-weight: bold;
+                        font-size: 14px;
                     }
                     QPushButton:hover {
                         background-color: #505050;
@@ -352,31 +498,242 @@ class BattMonCrossPlatform(QWidget):
                 
                 layout = QVBoxLayout()
                 
-                # Text area for help content
-                text_edit = QTextEdit()
-                print(f"[DEBUG] Setting text content in QTextEdit...")
-                text_edit.setPlainText(help_content)
+                # Text area for help content - use QTextBrowser with HTML support
+                text_edit = QTextBrowser()
+                print(f"[DEBUG] Setting HTML content in QTextBrowser...")
+                
+                # Enable hyperlinks to be clickable and open in default browser
+                text_edit.setOpenExternalLinks(True)
+                text_edit.setTextInteractionFlags(
+                    Qt.TextInteractionFlag.TextSelectableByMouse | 
+                    Qt.TextInteractionFlag.LinksAccessibleByMouse |
+                    Qt.TextInteractionFlag.LinksAccessibleByKeyboard
+                )
+                
+                # Apply GitHub-style dark theme CSS with proper margins and spacing
+                dark_themed_html = f"""
+<style>
+    body {{
+        background-color: #2b2b2b;
+        color: #e8e8e8;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Ubuntu', sans-serif;
+        font-size: 16px;
+        line-height: 1.7;
+        margin: 0;
+        padding: 0;
+        max-width: none;
+    }}
+    .content {{
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 45px 60px;
+        box-sizing: border-box;
+    }}
+    @media (max-width: 768px) {{
+        .content {{
+            padding: 30px 20px;
+        }}
+    }}
+    h1 {{
+        color: #ffffff;
+        font-size: 32px;
+        font-weight: 600;
+        margin: 0 0 25px 0;
+        border-bottom: 2px solid #444444;
+        padding-bottom: 15px;
+        line-height: 1.25;
+    }}
+    h1:first-child {{
+        margin-top: 0;
+    }}
+    h2 {{
+        color: #f0f0f0;
+        font-size: 24px;
+        font-weight: 600;
+        margin: 35px 0 20px 0;
+        border-bottom: 1px solid #444444;
+        padding-bottom: 10px;
+        line-height: 1.25;
+    }}
+    h3 {{
+        color: #e0e0e0;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 30px 0 15px 0;
+        line-height: 1.25;
+    }}
+    h4 {{
+        color: #d0d0d0;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 25px 0 12px 0;
+        line-height: 1.25;
+    }}
+    p {{
+        margin: 0 0 16px 0;
+        color: #e8e8e8;
+        font-size: 16px;
+        line-height: 1.6;
+    }}
+    a {{
+        color: #58a6ff;
+        text-decoration: none;
+        font-weight: 500;
+    }}
+    a:hover {{
+        color: #79c0ff;
+        text-decoration: underline;
+    }}
+    strong, b {{
+        color: #ffffff;
+        font-weight: 600;
+    }}
+    em, i {{
+        color: #f0f0f0;
+        font-style: italic;
+    }}
+    code {{
+        background-color: rgba(110, 118, 129, 0.4);
+        color: #f0f6fc;
+        padding: 3px 6px;
+        border-radius: 6px;
+        font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'Menlo', 'Courier', monospace;
+        font-size: 85%;
+        font-weight: 400;
+    }}
+    pre {{
+        background-color: #161b22;
+        color: #f0f6fc;
+        padding: 16px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 16px 0;
+        font-size: 85%;
+        line-height: 1.45;
+        border: 1px solid #30363d;
+    }}
+    pre code {{
+        background-color: transparent;
+        color: inherit;
+        padding: 0;
+        border-radius: 0;
+        font-size: inherit;
+    }}
+    ul, ol {{
+        margin: 0 0 16px 0;
+        padding-left: 32px;
+        font-size: 16px;
+    }}
+    ul ul, ol ol, ul ol, ol ul {{
+        margin: 8px 0;
+    }}
+    li {{
+        margin: 4px 0;
+        color: #e8e8e8;
+        line-height: 1.6;
+    }}
+    li p {{
+        margin: 8px 0;
+    }}
+    table {{
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin: 16px 0;
+        width: 100%;
+        background-color: transparent;
+        font-size: 14px;
+        display: block;
+        overflow: auto;
+    }}
+    table th {{
+        background-color: #21262d;
+        color: #f0f6fc;
+        padding: 12px 13px;
+        border: 1px solid #30363d;
+        font-weight: 600;
+        text-align: left;
+    }}
+    table td {{
+        padding: 12px 13px;
+        border: 1px solid #30363d;
+        color: #e6edf3;
+        background-color: #0d1117;
+    }}
+    table tr:nth-child(2n) {{
+        background-color: #161b22;
+    }}
+    table tr:nth-child(2n) td {{
+        background-color: #161b22;
+    }}
+    blockquote {{
+        background-color: transparent;
+        border-left: 4px solid #30363d;
+        margin: 16px 0;
+        padding: 0 16px;
+        color: #8b949e;
+        font-style: normal;
+        font-size: 16px;
+    }}
+    blockquote p {{
+        color: #8b949e;
+    }}
+    hr {{
+        border: none;
+        height: 1px;
+        background-color: #30363d;
+        margin: 24px 0;
+    }}
+    .highlight {{
+        background-color: #161b22;
+        padding: 16px;
+        border-radius: 8px;
+        border: 1px solid #30363d;
+        overflow-x: auto;
+    }}
+</style>
+<body>
+    <div class="content">
+        {html_content}
+    </div>
+</body>
+"""
+                
+                text_edit.setHtml(dark_themed_html)
                 text_edit.setReadOnly(True)
                 
-                # Check if content was actually set
-                actual_content = text_edit.toPlainText()
-                print(f"[DEBUG] QTextEdit content length after setting: {len(actual_content)}")
-                print(f"[DEBUG] Content matches: {actual_content == help_content}")
-                print(f"[DEBUG] First 50 chars from QTextEdit: {repr(actual_content[:50])}")
-                
-                # Modern dark theme styling for better readability
+                # Dark theme styling for the QTextBrowser widget itself
                 text_edit.setStyleSheet("""
-                    QTextEdit {
-                        font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
-                        font-size: 13px;
-                        line-height: 1.5;
+                    QTextBrowser {
                         background-color: #2b2b2b;
-                        color: #e8e8e8;
+                        color: #e0e0e0;
                         border: 1px solid #555555;
-                        border-radius: 6px;
-                        padding: 15px;
-                        selection-background-color: #404040;
+                        border-radius: 8px;
+                        padding: 0px;
+                        selection-background-color: #0078d4;
                         selection-color: #ffffff;
+                    }
+                    QScrollBar:vertical {
+                        background-color: #404040;
+                        width: 12px;
+                        border-radius: 6px;
+                        border: none;
+                    }
+                    QScrollBar::handle:vertical {
+                        background-color: #666666;
+                        border-radius: 6px;
+                        min-height: 20px;
+                        border: none;
+                    }
+                    QScrollBar::handle:vertical:hover {
+                        background-color: #777777;
+                    }
+                    QScrollBar::handle:vertical:pressed {
+                        background-color: #555555;
+                    }
+                    QScrollBar::add-line:vertical,
+                    QScrollBar::sub-line:vertical {
+                        border: none;
+                        background: none;
                     }
                 """)
                 
@@ -387,7 +744,7 @@ class BattMonCrossPlatform(QWidget):
                 # Close button
                 close_button = QPushButton("Close")
                 close_button.clicked.connect(help_dialog.accept)
-                close_button.setMinimumSize(QSize(100, 30))
+                close_button.setMinimumSize(QSize(100, 35))
                 
                 button_layout.addWidget(close_button)
                 

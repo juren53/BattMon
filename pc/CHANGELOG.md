@@ -7,7 +7,125 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.9] - 2025-08-16 04:18:00 CDT
+
+### Enhanced - Professional Help System with Clickable Links 📖
+- **GitHub-Style Help Documentation**: Completely redesigned Help system with professional GitHub-like dark theme styling
+  - **Rich HTML Rendering**: Enhanced markdown-to-HTML conversion with proper GitHub-style CSS including:
+    - Professional typography with `-apple-system`, `BlinkMacSystemFont`, and `Segoe UI` font stack
+    - Proper heading hierarchy with color-coded headings (#ffffff, #f0f0f0, #e0e0e0)
+    - Enhanced code blocks with syntax highlighting and dark GitHub theme colors
+    - Beautiful table styling with alternating row colors and proper borders
+    - Improved link styling with GitHub-blue (#58a6ff) hover effects
+    - Responsive design with proper margins and padding for optimal readability
+  - **QTextBrowser Integration**: Replaced QTextEdit with QTextBrowser for proper hyperlink support
+    - **Clickable Hyperlinks**: Links in Help documentation now properly open in default web browser
+    - **External Link Support**: `setOpenExternalLinks(True)` enables seamless browser integration
+    - **Proper Link Interaction**: Full keyboard and mouse accessibility for hyperlinks
+  - **Enhanced Widget Styling**: Updated CSS selector from QTextEdit to QTextBrowser for consistent dark theme
+
+### Help Documentation Features
+- **Interactive GitHub Links**: Added direct hyperlinks to project resources in HELP.md
+  - **Changelog Access**: Direct link to GitHub changelog for latest updates and version history
+  - **Issue Tracking**: Direct link to GitHub issues page for bug reports and feature requests
+  - **Seamless Navigation**: Links open in new browser tabs for uninterrupted application usage
+- **Comprehensive Content**: Enhanced help content covers all application features
+  - Complete usage guide with visual indicators and color coding explanations
+  - Detailed notification system documentation with milestone threshold examples
+  - Platform-specific implementation details for Linux, Windows, and macOS
+  - Configuration file locations and format examples
+  - Troubleshooting guide with common issues and solutions
+
+### Technical Implementation
+- **Advanced Markdown Processing**: Enhanced markdown-to-HTML converter with GitHub-compatible features
+  - **Table Support**: Proper table rendering with GitHub-style borders and alternating colors
+  - **Code Block Enhancement**: Fenced code blocks with proper syntax highlighting CSS
+  - **Link Processing**: Automatic conversion of markdown links to clickable HTML anchors
+  - **Fallback Support**: Robust error handling with basic converter fallback when advanced features unavailable
+- **Professional CSS Framework**: GitHub-inspired dark theme with comprehensive styling
+  - **Color Scheme**: Authentic GitHub dark theme colors (#2b2b2b background, #e8e8e8 text)
+  - **Typography**: Professional font hierarchy with proper line heights and spacing
+  - **Layout**: Responsive design with max-width containers and mobile-friendly padding
+  - **Interactive Elements**: Proper hover states and focus indicators for accessibility
+
+### User Experience Improvements
+- **Professional Appearance**: Help dialog now matches GitHub's documentation styling standards
+- **Enhanced Readability**: Improved typography, spacing, and color contrast for better comprehension
+- **Interactive Documentation**: Clickable links provide direct access to project resources
+- **Consistent Theming**: Dark theme styling matches the rest of the application's interface
+- **Better Navigation**: External links open in browser while keeping application running
+- **Accessibility**: Proper keyboard navigation and screen reader compatibility
+
+### Key Benefits
+- ✅ **GitHub-Quality Documentation**: Professional styling that matches industry standards
+- ✅ **Interactive Help**: Clickable links enhance user engagement and support
+- ✅ **Enhanced Accessibility**: Better color contrast, typography, and navigation support
+- ✅ **Seamless Integration**: Links work across all supported platforms (Linux, Windows, macOS)
+- ✅ **Professional Polish**: Help system demonstrates application maturity and attention to detail
+- ✅ **Resource Access**: Direct access to changelog and issue tracking for better user support
+- ✅ **Modern UI Framework**: Qt6 QTextBrowser provides superior hyperlink handling
+
 ## [0.5.8] - 2025-08-14 14:06:42 CDT
+
+### Added - Comprehensive Cross-Platform Installation System 💿
+- **Complete Linux Installation Suite**: Professional multi-distro installation system
+  - **install-linux.sh**: Full-featured installer with dependency management, desktop integration, and PATH setup
+  - **install-test-linux.sh**: Safe test installer using virtual environments without system modifications
+  - **Multi-Distribution Support**: Works across Debian/Ubuntu, RHEL/Fedora, Arch, openSUSE, and other major Linux distributions
+  - **Automatic Dependency Detection**: Intelligently detects package managers (apt, dnf, yum, pacman, zypper) and installs Python3 and PyQt6
+  - **Desktop Integration**: Creates proper .desktop files with battery icons and integrates with application menus
+  - **PATH Management**: Optionally adds BattMon to system PATH for command-line access
+  - **Comprehensive Testing**: Verifies installation, tests battery detection, and validates desktop integration
+
+- **Advanced Windows Installation System**: Dual-approach Windows installer supporting PowerShell and Python
+  - **install-windows.ps1**: Feature-rich PowerShell installer with Windows Package Manager integration
+    - **Python Auto-Install**: Detects and installs Python via winget if not present
+    - **Start Menu Integration**: Creates proper Start Menu shortcuts with battery icons
+    - **Environment PATH Setup**: Configures user PATH environment variables via Windows registry
+    - **Interactive Installation**: Colorful console output with user prompts and error handling
+    - **Installation Testing**: Comprehensive post-install verification and optional application launch
+  - **install-windows.py**: Alternative Python-based installer for restricted PowerShell environments
+    - **Windows API Integration**: Direct Windows registry manipulation for PATH management
+    - **Cross-Compatible**: Works in environments where PowerShell execution is restricted
+    - **Complete Feature Parity**: All features available in both PowerShell and Python installers
+
+### Installation Documentation and Support
+- **Enhanced INSTALL.md**: Comprehensive installation guide covering all platforms
+  - **Step-by-Step Instructions**: Detailed installation procedures for Linux and Windows
+  - **Troubleshooting Section**: Common installation issues and their solutions
+  - **Uninstallation Guide**: Complete removal instructions for both platforms
+  - **Update Procedures**: How to update BattMon installations
+  - **Platform-Specific Notes**: Important considerations for different operating systems
+
+- **Requirements Management**: Platform-specific dependency handling
+  - **requirements-linux.txt**: PyQt6 and Linux-specific optional enhancements
+  - **requirements-windows.txt**: PyQt6 with Windows-specific optional packages (WMI, psutil)
+  - **Flexible Dependencies**: Core functionality works with minimal requirements, enhanced features available with additional packages
+
+### User Experience Improvements
+- **One-Command Installation**: Simple `curl | bash` or PowerShell execution for quick setup
+- **Professional Desktop Integration**: Proper application menu entries with battery icons
+- **Command-Line Access**: Optional PATH integration for terminal usage
+- **Safe Testing Environment**: Test installer allows risk-free evaluation before system installation
+- **Comprehensive Verification**: Post-install testing ensures everything works correctly
+
+### Technical Implementation
+- **Cross-Platform File Management**: Intelligent handling of Windows/Linux path differences
+- **Robust Error Handling**: Comprehensive error detection and user-friendly error messages
+- **Package Manager Abstraction**: Unified interface across different Linux package managers
+- **Registry Integration**: Proper Windows environment variable management
+- **Virtual Environment Support**: Clean dependency isolation for testing scenarios
+- **Icon Resource Management**: Automatic battery icon extraction and integration
+
+### Key Benefits
+- ✅ **Simplified Distribution**: Users can install BattMon with a single command
+- ✅ **Professional Integration**: Proper desktop environment integration across platforms
+- ✅ **Zero Technical Expertise Required**: Non-technical users can easily install and use BattMon
+- ✅ **Safe Testing**: Test installation mode allows risk-free evaluation
+- ✅ **Complete Uninstall**: Clean removal procedures preserve system integrity
+- ✅ **Update Support**: Built-in procedures for keeping BattMon current
+- ✅ **Wide Compatibility**: Works across major Linux distributions and Windows versions
+- ✅ **Developer-Friendly**: Easy setup for development and testing environments
 
 ### Enhanced - Battery Status Window Phase 1 🔋
 - **Redesigned Battery Status Dialog**: Completely reimplemented the Battery Status Window to match the About dialog's professional styling
