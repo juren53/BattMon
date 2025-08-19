@@ -8,6 +8,76 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.12] - 2025-08-19 00:30:00 CDT
+
+### Added - Standalone Profile Editor with GUI Configuration Management 🔧
+- **Complete Profile Editor Module**: Created standalone `profile_editor.py` providing comprehensive GUI for editing BattMon settings
+  - **Modern Dark Theme**: Professional PyQt6 interface with dark color scheme matching main application
+  - **Organized Settings Groups**: Intuitive sections for Notification Settings, Battery Alert Thresholds, and Advanced Info
+  - **Input Validation**: Real-time validation of threshold lists, timeout values, and numerical inputs
+  - **Save/Reset/Cancel**: Full profile management with reset to defaults and validation feedback
+  - **Cross-Platform Paths**: Automatically detects correct configuration paths for Windows, Linux, and macOS
+  - **User-Friendly Interface**: Tooltips, help text, and clear status messages throughout
+
+### Enhanced User Configuration Experience
+- **Integrated Menu Access**: Added "🔧 Profile Editor" option to system tray context menu for easy access
+- **Settings Persistence**: Direct editing of `profile.json` configuration file with automatic backup
+- **Live Reloading**: Option to reload settings immediately after editing without application restart
+- **Visual Feedback**: Status messages show load/save operations and validation results
+- **Comprehensive Settings Coverage**:
+  - Notification enable/disable and timeout duration
+  - Audio alert enable/disable settings
+  - Sleep/wake notification preferences
+  - Discharge milestone thresholds (customizable percentage list)
+  - Charging milestone thresholds (customizable percentage list)
+  - Sleep detection threshold timing
+
+### Profile Editor Features
+- **Validation System**: Input validation prevents invalid settings and provides clear error messages
+- **Threshold List Parsing**: Intelligent comma-separated list parsing for milestone percentages
+- **Default Reset**: One-click reset to factory default settings with confirmation dialog
+- **Profile Path Display**: Shows exact location of configuration file being edited
+- **Version Synchronization**: Profile editor version stays in sync with main application
+- **Error Handling**: Comprehensive error handling with user-friendly messages
+
+### Technical Implementation
+- **Modular Design**: Standalone module that can be imported or run independently
+- **PyQt6 Integration**: Modern Qt6 widgets with professional styling and responsive layout
+- **JSON Configuration**: Direct manipulation of human-readable JSON profile files
+- **Cross-Platform Support**: Works seamlessly on Windows, Linux, and macOS
+- **Import Error Handling**: Graceful handling when profile editor module is unavailable
+- **Memory Efficient**: Lightweight dialog that loads on-demand and closes cleanly
+
+### User Experience Improvements
+- **Intuitive Interface**: Logical grouping of settings with clear labels and help text
+- **Professional Styling**: Consistent dark theme with proper typography and spacing
+- **Immediate Feedback**: Real-time validation and status updates during configuration
+- **Easy Access**: Right-click system tray menu provides direct access to configuration
+- **Safe Configuration**: Validation prevents invalid settings that could break functionality
+- **Backup Safety**: Changes are only saved when explicitly requested by user
+
+### Enhanced Tooltip System
+- **Improved Tray Tooltip**: Updated system tray tooltip format from generic "BattMon Cross-Platform - Battery Monitor" to descriptive "BattMon - battery monitor - Battery X%" format
+- **Dynamic Status Display**: Tooltip now shows real-time battery percentage for at-a-glance status checking
+- **Consistent Branding**: Streamlined tooltip text maintains professional appearance while providing essential information
+
+### Integration Benefits
+- **Seamless Workflow**: Edit settings directly from system tray without external configuration files
+- **Live Configuration**: Changes can be applied immediately or on next application restart
+- **User Empowerment**: Non-technical users can easily customize battery monitoring behavior
+- **Professional Polish**: GUI configuration demonstrates application maturity and user-centric design
+- **Maintenance Friendly**: Centralized configuration management reduces support complexity
+
+### Key Benefits
+- ✅ **User-Friendly Configuration**: No more manual JSON editing required
+- ✅ **Professional Interface**: Modern GUI with validation and error handling
+- ✅ **Immediate Access**: Right-click system tray menu integration
+- ✅ **Safe Configuration**: Input validation prevents invalid settings
+- ✅ **Cross-Platform**: Works identically across all supported operating systems
+- ✅ **Live Updates**: Settings can be reloaded without application restart
+- ✅ **Enhanced Usability**: Clear tooltips and status messages guide user actions
+- ✅ **Comprehensive Coverage**: All user-configurable settings available in one interface
+
 ## [0.5.11] - 2025-08-18 23:35:00 CDT
 
 ### Enhanced - Modern Battery Status Window 💻

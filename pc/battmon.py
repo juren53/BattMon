@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.11 - Enhanced Milestone Tracking with Professional Help System
+Version 0.5.12 - Profile Editor Integration with Enhanced User Configuration
 
 Change Log at:  https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md
 
@@ -39,7 +39,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.11'
+VERSION = '0.5.12'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -282,6 +282,11 @@ class BattMonCrossPlatform(QWidget):
         settings_action = QAction("🔔 Show Notification Settings", self)
         settings_action.triggered.connect(self.show_startup_notification)
         menu.addAction(settings_action)
+        
+        # Profile Editor action
+        profile_editor_action = QAction("🔧 Profile Editor", self)
+        profile_editor_action.triggered.connect(self.show_profile_editor)
+        menu.addAction(profile_editor_action)
         
         menu.addSeparator()
         
@@ -1094,6 +1099,73 @@ License: GPL v2+</p>
         msg_box.setText(about_text)
         msg_box.setIconPixmap(self.create_battery_icon(75, False).pixmap(64, 64))
         msg_box.exec()
+    
+    def show_profile_editor(self):
+        """Show the Profile Editor dialog"""
+        try:
+            # Import required PyQt6 components for QDialog
+            from PyQt6.QtWidgets import QDialog
+            
+            # Import the profile editor module
+            import profile_editor
+            
+            # Get the profile path
+            config_dir = self.get_config_dir()
+            profile_path = os.path.join(config_dir, 'profile.json')
+            
+            # Create and show the profile editor
+            editor = profile_editor.ProfileEditor(parent=self, profile_path=profile_path)
+            
+            # Center the editor window
+            if hasattr(QApplication, 'primaryScreen'):
+                screen = QApplication.primaryScreen().geometry()
+                x = (screen.width() - editor.width()) // 2
+                y = (screen.height() - editor.height()) // 2
+                editor.move(x, y)
+            
+            # Show the editor dialog
+            result = editor.exec()
+            
+            # If settings were saved, offer to reload the profile
+            if result == QDialog.DialogCode.Accepted:
+                reply = QMessageBox.question(self, "Profile Updated", 
+                                           "Profile settings have been updated. Would you like to reload the settings now?\n\n"
+                                           "Note: Some changes may require restarting BattMon to take full effect.",
+                                           QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                           QMessageBox.StandardButton.Yes)
+                
+                if reply == QMessageBox.StandardButton.Yes:
+                    # Reload the profile
+                    old_profile = self.user_profile.copy()
+                    self.user_profile = self.load_user_profile()
+                    
+                    # Update current settings from reloaded profile
+                    self.milestone_thresholds = self.user_profile.get('milestone_thresholds', [90, 80, 70, 60, 50, 40, 30, 20, 10])
+                    self.charging_milestones = self.user_profile.get('charging_milestones', [25, 50, 75, 90, 100])
+                    self.notifications_enabled = self.user_profile.get('notifications_enabled', True)
+                    self.sleep_threshold = self.user_profile.get('sleep_threshold', 300)
+                    self.sleep_notifications_enabled = self.user_profile.get('sleep_notifications_enabled', True)
+                    
+                    # Reset milestone tracking to prevent duplicate notifications
+                    self.last_milestone_triggered = None
+                    self.last_charging_milestone = None
+                    
+                    print("Profile settings reloaded successfully")
+                    
+                    # Show confirmation
+                    QMessageBox.information(self, "Settings Reloaded", 
+                                          "Profile settings have been reloaded successfully!\n\n"
+                                          "The new settings are now active.")
+            
+        except ImportError as e:
+            error_msg = f"Could not import profile_editor module: {e}\n\nMake sure profile_editor.py is in the same directory as battmon.py."
+            print(f"[ERROR] {error_msg}")
+            QMessageBox.critical(self, "Profile Editor Error", error_msg)
+            
+        except Exception as e:
+            error_msg = f"Error opening Profile Editor: {e}"
+            print(f"[ERROR] {error_msg}")
+            QMessageBox.critical(self, "Profile Editor Error", error_msg)
     
     def quit_application(self):
         """Quit the application"""
@@ -2433,9 +2505,7 @@ try {{
             self.tray_icon.setIcon(icon)
         
         # Update tooltip
-        tooltip = f"BattMon Cross-Platform ({CURRENT_OS})\\nBattery: {percentage}% ({state})"
-        if info.get('time'):
-            tooltip += f"\\nTime: {info['time']}"
+        tooltip = f"BattMon - battery monitor - Battery {percentage}%"
         self.tray_icon.setToolTip(tooltip)
         
         # Update context menu status
