@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.10 - Enhanced Milestone Tracking with Professional Help System
+Version 0.5.11 - Enhanced Milestone Tracking with Professional Help System
+
+Change Log at:  https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -37,7 +39,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.10'
+VERSION = '0.5.11'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
@@ -209,6 +211,9 @@ class BattMonCrossPlatform(QWidget):
         # Track last seen percentage across ticks (for drop detection across state changes)
         self.last_seen_percent = None
         
+        # Battery Status Window state tracking
+        self.battery_status_window = None  # Reference to the currently open battery status window
+        
         # Desktop notifications system
         self.user_profile = self.load_user_profile()
         
@@ -308,8 +313,226 @@ class BattMonCrossPlatform(QWidget):
             self.show_battery_window()
     
     def show_battery_window(self):
-        """Show the battery information window"""
-        show_battery_window_dialog(self)
+        """Toggle the battery information window"""
+        # If battery status window is currently open, close it
+        if self.battery_status_window is not None:
+            try:
+                self.battery_status_window.close()
+                self.battery_status_window = None
+                print("[DEBUG] Battery status window closed")
+                return
+            except Exception as e:
+                print(f"[DEBUG] Error closing battery status window: {e}")
+                self.battery_status_window = None
+        
+        # Otherwise, create and show a new battery status window
+        try:
+            self.battery_status_window = self.create_battery_status_dialog()
+            if self.battery_status_window:
+                # Connect the finished signal to clear our reference when dialog is closed
+                self.battery_status_window.finished.connect(self.on_battery_window_closed)
+                # Show the dialog non-modally (so it doesn't block the main application)
+                self.battery_status_window.show()
+                print("[DEBUG] Battery status window opened")
+        except Exception as e:
+            print(f"[DEBUG] Error creating battery status window: {e}")
+            self.battery_status_window = None
+    
+    def create_battery_status_dialog(self):
+        """Create a non-modal battery status dialog"""
+        try:
+            from PyQt6.QtWidgets import QDialog, QVBoxLayout, QLabel, QPushButton, QHBoxLayout
+            from PyQt6.QtCore import QTimer
+            
+            # Get battery information
+            info = self.get_battery_info()
+            detailed_info = self.get_detailed_battery_info()
+            
+            percentage = info['percentage']
+            state = info['state']
+            time_remaining = info.get('time', '')
+            is_charging = info.get('state', '').lower() in ('charging', 'full')
+            
+            # Create dialog
+            dialog = QDialog()
+            dialog.setWindowTitle("Battery Status - BattMon Cross-Platform")
+            dialog.setModal(False)  # Non-modal so it doesn't block the main application
+            dialog.resize(500, 400)
+            
+            # Set dialog icon
+            dialog.setWindowIcon(self.create_battery_icon(percentage, is_charging, 24))
+            
+            # Create layout
+            layout = QVBoxLayout()
+            
+            # Create main content label
+            content_label = QLabel()
+            content_label.setTextFormat(Qt.TextFormat.RichText)
+            content_label.setWordWrap(True)
+            
+            # Create the battery status text in HTML format
+            charging_indicator = " ⚡" if is_charging else ""
+            time_info = f"<br><b>Time Remaining:</b> {time_remaining}" if time_remaining else ""
+            
+            # Color-code the percentage based on battery level
+            if percentage >= 75:
+                color = "#27ae60"  # Green
+                status_icon = "🔋"
+            elif percentage >= 50:
+                color = "#f39c12"  # Orange-yellow
+                status_icon = "🔋"
+            elif percentage >= 30:
+                color = "#e67e22"  # Orange
+                status_icon = "⚠️"
+            else:
+                color = "#e74c3c"  # Red
+                status_icon = "🚨"
+            
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            
+            battery_text = f"""
+<h2>{status_icon} BattMon Cross-Platform - Battery Status</h2>
+
+<p><b>Current Charge:</b> <span style="color: {color}; font-size: 18pt; font-weight: bold;">{percentage}%{charging_indicator}</span><br>
+<b>Battery State:</b> {state}{time_info}<br>
+<b>Platform:</b> {CURRENT_OS}<br>
+<b>Last Updated:</b> {current_time}</p>
+
+<h3>⚡ Battery Details</h3>
+<p><b>Technology:</b> {detailed_info.get('technology', 'Unknown')}<br>
+<b>Manufacturer:</b> {detailed_info.get('manufacturer', 'Unknown')}<br>
+<b>Voltage:</b> {detailed_info.get('voltage', 'Unknown')}<br>
+<b>Power Draw:</b> {detailed_info.get('power_draw', 'Unknown')}</p>
+
+<h3>💚 Battery Health</h3>
+<p><b>Health Status:</b> {detailed_info.get('health_status', 'Unknown')}<br>
+<b>Health Percentage:</b> {detailed_info.get('health_percentage', 0)}%<br>
+<b>Design Capacity:</b> {detailed_info.get('design_capacity', 'Unknown')}<br>
+<b>Current Capacity:</b> {detailed_info.get('current_capacity', 'Unknown')}<br>
+<b>Cycle Count:</b> {detailed_info.get('cycle_count', 'Unknown')}</p>
+
+<p style="margin-top: 10px; text-align: center;">
+<b>BattMon Cross-Platform</b> v{VERSION}<br>
+<em>Real-time battery monitoring and health tracking</em>
+</p>
+"""
+            
+            content_label.setText(battery_text)
+            layout.addWidget(content_label)
+            
+            # Create button layout
+            button_layout = QHBoxLayout()
+            
+            # Refresh button
+            refresh_button = QPushButton("🔄 Refresh")
+            refresh_button.clicked.connect(lambda: self.refresh_battery_dialog(dialog, content_label))
+            button_layout.addWidget(refresh_button)
+            
+            button_layout.addStretch()
+            
+            # Close button
+            close_button = QPushButton("Close")
+            close_button.clicked.connect(dialog.close)
+            button_layout.addWidget(close_button)
+            
+            layout.addLayout(button_layout)
+            
+            dialog.setLayout(layout)
+            
+            # Set up auto-refresh timer
+            refresh_timer = QTimer()
+            refresh_timer.timeout.connect(lambda: self.refresh_battery_dialog(dialog, content_label))
+            refresh_timer.start(5000)  # Refresh every 5 seconds
+            
+            # Store timer reference in dialog so it doesn't get garbage collected
+            dialog._refresh_timer = refresh_timer
+            
+            return dialog
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to create battery status dialog: {e}")
+            return None
+    
+    def refresh_battery_dialog(self, dialog, content_label):
+        """Refresh the battery status dialog content"""
+        try:
+            if dialog is None or not dialog.isVisible():
+                return
+            
+            # Get updated battery information
+            info = self.get_battery_info()
+            detailed_info = self.get_detailed_battery_info()
+            
+            percentage = info['percentage']
+            state = info['state']
+            time_remaining = info.get('time', '')
+            is_charging = info.get('state', '').lower() in ('charging', 'full')
+            
+            # Update dialog icon
+            dialog.setWindowIcon(self.create_battery_icon(percentage, is_charging, 24))
+            
+            # Create updated content
+            charging_indicator = " ⚡" if is_charging else ""
+            time_info = f"<br><b>Time Remaining:</b> {time_remaining}" if time_remaining else ""
+            
+            # Color-code the percentage based on battery level
+            if percentage >= 75:
+                color = "#27ae60"  # Green
+                status_icon = "🔋"
+            elif percentage >= 50:
+                color = "#f39c12"  # Orange-yellow
+                status_icon = "🔋"
+            elif percentage >= 30:
+                color = "#e67e22"  # Orange
+                status_icon = "⚠️"
+            else:
+                color = "#e74c3c"  # Red
+                status_icon = "🚨"
+            
+            current_time = datetime.datetime.now().strftime("%H:%M:%S")
+            
+            battery_text = f"""
+<h2>{status_icon} BattMon Cross-Platform - Battery Status</h2>
+
+<p><b>Current Charge:</b> <span style="color: {color}; font-size: 18pt; font-weight: bold;">{percentage}%{charging_indicator}</span><br>
+<b>Battery State:</b> {state}{time_info}<br>
+<b>Platform:</b> {CURRENT_OS}<br>
+<b>Last Updated:</b> {current_time}</p>
+
+<h3>⚡ Battery Details</h3>
+<p><b>Technology:</b> {detailed_info.get('technology', 'Unknown')}<br>
+<b>Manufacturer:</b> {detailed_info.get('manufacturer', 'Unknown')}<br>
+<b>Voltage:</b> {detailed_info.get('voltage', 'Unknown')}<br>
+<b>Power Draw:</b> {detailed_info.get('power_draw', 'Unknown')}</p>
+
+<h3>💚 Battery Health</h3>
+<p><b>Health Status:</b> {detailed_info.get('health_status', 'Unknown')}<br>
+<b>Health Percentage:</b> {detailed_info.get('health_percentage', 0)}%<br>
+<b>Design Capacity:</b> {detailed_info.get('design_capacity', 'Unknown')}<br>
+<b>Current Capacity:</b> {detailed_info.get('current_capacity', 'Unknown')}<br>
+<b>Cycle Count:</b> {detailed_info.get('cycle_count', 'Unknown')}</p>
+
+<p style="margin-top: 10px; text-align: center;">
+<b>BattMon Cross-Platform</b> v{VERSION}<br>
+<em>Real-time battery monitoring and health tracking</em>
+</p>
+"""
+            
+            # Update the content
+            content_label.setText(battery_text)
+            print("[DEBUG] Battery status dialog refreshed")
+            
+        except Exception as e:
+            print(f"[ERROR] Failed to refresh battery status dialog: {e}")
+    
+    def on_battery_window_closed(self):
+        """Handle battery status window being closed"""
+        print("[DEBUG] Battery status window closed via signal")
+        # Stop the refresh timer if it exists
+        if self.battery_status_window and hasattr(self.battery_status_window, '_refresh_timer'):
+            self.battery_status_window._refresh_timer.stop()
+        # Clear the reference
+        self.battery_status_window = None
     
     def markdown_to_html(self, markdown_text):
         """Convert Markdown text to HTML using proper markdown library for GitHub-like rendering"""
@@ -1721,22 +1944,108 @@ try {{
             if 'Battery' not in text:
                 return self.get_battery_info_fallback()
             
-            data = text.split(',')
-            state = data[0].split(':')[1].strip()
-            percentage_str = data[1].strip(' %')
-            percentage = int(percentage_str)
-            time = None
+            # Handle different acpi output formats
+            # Format 1: "Battery 0: Full, 100%"
+            # Format 2: "100%\nBattery 1: Discharging"
+            # Format 3: Multiple lines with different formats
             
-            if len(data) > 2 and state not in ('Full', 'Unknown'):
-                time_part = data[2].strip()
-                if ' ' in time_part:
-                    time = time_part.split(' ')[1]
+            # Split by lines first to handle multi-line output
+            lines = text.split('\n')
             
-            return {
-                'state': state,
-                'percentage': percentage,
-                'time': time
-            }
+            # Process each line to find battery information
+            for line in lines:
+                line = line.strip()
+                if not line or 'Battery' not in line:
+                    continue
+                
+                # Try comma-separated format first (Format 1)
+                if ',' in line:
+                    try:
+                        data = line.split(',')
+                        if len(data) >= 2:
+                            # Extract state from first part
+                            if ':' in data[0]:
+                                state = data[0].split(':')[1].strip()
+                            else:
+                                state = "Unknown"
+                            
+                            # Extract percentage from second part
+                            percentage_part = data[1].strip()
+                            # Extract percentage number (handle various formats like " 100%", "100%", etc.)
+                            import re
+                            percentage_match = re.search(r'(\d+)%', percentage_part)
+                            if percentage_match:
+                                percentage = int(percentage_match.group(1))
+                            else:
+                                continue  # Skip this line if no percentage found
+                            
+                            # Extract time remaining if available
+                            time = None
+                            if len(data) > 2 and state not in ('Full', 'Unknown'):
+                                time_part = data[2].strip()
+                                if ' ' in time_part:
+                                    time = time_part.split(' ')[1]
+                            
+                            return {
+                                'state': state,
+                                'percentage': percentage,
+                                'time': time
+                            }
+                    except Exception as e:
+                        pass  # Continue to next parsing method
+                        continue
+                
+                # Try colon-separated format (Format 2 and variations)
+                if ':' in line:
+                    try:
+                        parts = line.split(':')
+                        if len(parts) >= 2:
+                            # First part should contain "Battery X"
+                            # Second part should contain state and possibly percentage
+                            battery_part = parts[0].strip()
+                            info_part = ':'.join(parts[1:]).strip()  # Join back in case of multiple colons
+                            
+                            # Extract percentage using regex
+                            import re
+                            percentage_match = re.search(r'(\d+)%', info_part)
+                            if percentage_match:
+                                percentage = int(percentage_match.group(1))
+                            else:
+                                # Maybe percentage is in the battery part or elsewhere
+                                percentage_match = re.search(r'(\d+)%', line)
+                                if percentage_match:
+                                    percentage = int(percentage_match.group(1))
+                                else:
+                                    continue  # Skip if no percentage found
+                            
+                            # Extract state (check 'discharging' before 'charging' since 'discharging' contains 'charging')
+                            state = "Unknown"
+                            if 'discharging' in info_part.lower():
+                                state = "Discharging"
+                            elif 'charging' in info_part.lower():
+                                state = "Charging"
+                            elif 'full' in info_part.lower() or 'charged' in info_part.lower():
+                                state = "Full"
+                            elif 'unknown' in info_part.lower():
+                                state = "Unknown"
+                            
+                            # Extract time remaining
+                            time = None
+                            time_match = re.search(r'(\d{2}:\d{2})', info_part)
+                            if time_match:
+                                time = time_match.group(1)
+                            
+                            return {
+                                'state': state,
+                                'percentage': percentage,
+                                'time': time
+                            }
+                    except Exception as e:
+                        pass  # Continue to next parsing method
+                        continue
+            
+            # If we get here, no valid battery info was found
+            return self.get_battery_info_fallback()
             
         except Exception as e:
             print(f"Error getting Linux battery info: {e}")

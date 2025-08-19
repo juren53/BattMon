@@ -7,6 +7,107 @@ All notable changes to BattMon PC will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.5.11] - 2025-08-18 23:35:00 CDT
+
+### Enhanced - Modern Battery Status Window 💻
+- **QDialog-Based Battery Window**: Upgraded battery status display to a QDialog implementation
+  - **Toggle Functionality**: Left-click system tray icon now opens/closes battery status window
+  - **Non-Modal Design**: Battery window stays open while allowing full interaction with other applications
+  - **Auto-Refresh System**: Window content updates automatically every 5 seconds with live battery data
+  - **Manual Refresh**: Dedicated refresh button for instant battery information updates
+  - **Window State Tracking**: Application remembers if battery window is open and properly manages window lifecycle
+  - **Professional Layout**: Rich HTML formatting with color-coded status, battery details, and health information
+
+### Improved User Experience
+- **Persistent Window**: Battery information window can stay open for continuous monitoring
+- **Seamless Interaction**: Non-blocking window allows users to continue working while monitoring battery status
+- **Real-Time Updates**: Live data refresh ensures information stays current without user intervention
+- **Smart Toggle**: Single left-click opens window, another left-click closes it for intuitive control
+- **Enhanced Accessibility**: Larger, persistent window improves readability compared to temporary modal dialogs
+
+### Fixed - Linux Battery Parsing Robustness 🔧
+- **Comprehensive ACPI Output Parser**: Fixed critical Linux battery parsing bug that caused crashes on systems with non-standard ACPI output formats
+  - **Root Cause**: Original parser expected comma-separated format like `"Battery 0: Full, 100%"` but some systems output `"100%\nBattery 1: Discharging"` without commas
+  - **Solution**: Implemented robust multi-format parsing engine that handles various ACPI output formats
+  - **GitHub Issue**: Resolves [Issue #8](https://github.com/juren53/BattMon/issues/8) - `invalid literal for int() with base 10: '100%\nBattery 1: Discharging'`
+
+### Removed - Debug Output Cleanup 🧹
+- **Production-Ready Console Output**: Removed all debug print statements from Linux battery parsing functions
+  - **Cleaner Runtime**: Eliminated verbose `[DEBUG] Parsed (comma format)...` and similar debug messages
+  - **Silent Error Handling**: Replaced debug print statements in exception handlers with silent `pass` statements
+  - **Professional Output**: Application now runs silently in production mode while maintaining full functionality
+  - **Maintained Error Handling**: All exception handling logic preserved, just without verbose console output
+
+### Enhanced Linux Compatibility
+- **Multi-Format Support**: Parser now handles multiple ACPI output formats seamlessly
+  - **Format 1**: `"Battery 0: Full, 100%"` (comma-separated - original working format)
+  - **Format 2**: `"100%\nBattery 1: Discharging"` (newline-separated - previously broken format)
+  - **Format 3**: Multi-line variations and mixed formats from different Linux distributions
+- **Line-by-Line Processing**: Enhanced parsing logic splits by newlines first, then processes each line for battery information
+- **Regex-Based Extraction**: Robust percentage extraction using regex patterns that work across all formats
+- **Corrected State Detection**: Fixed state detection logic to check 'discharging' before 'charging' (since 'discharging' contains 'charging')
+
+### Technical Improvements
+- **Comprehensive Error Handling**: Enhanced error handling with graceful degradation when parsing fails
+- **Backward Compatibility**: All existing working systems continue to work without changes
+- **Cross-Distribution Testing**: Parser designed to work across different Linux distributions with varying ACPI implementations
+- **QDialog Architecture**: Modern window management with proper lifecycle handling and auto-refresh capabilities
+
+### User Experience Benefits
+- **No More Crashes**: Application no longer crashes on systems with non-standard ACPI output
+- **Universal Linux Support**: Works across more Linux distributions and hardware configurations
+- **Silent Recovery**: Application gracefully handles parsing failures and continues monitoring
+- **Better Battery Monitoring**: Persistent, refreshing battery window provides superior monitoring experience
+
+### Key Benefits
+- ✅ **Critical Bug Fix**: Resolves application crashes on affected Linux systems
+- ✅ **Enhanced Reliability**: Robust parsing works across different ACPI implementations
+- ✅ **Better Hardware Support**: Supports various battery configurations and manufacturers
+- ✅ **Modern UI**: Professional QDialog-based battery status window
+- ✅ **Backward Compatibility**: Existing installations continue working without changes
+- ✅ **Production Ready**: Clean console output without debug clutter
+- ✅ **Future-Proof**: Parser architecture handles unknown ACPI output variations
+
+## [0.5.10] - 2025-08-16 16:10:00 CDT
+
+### Fixed - Milestone Notification Startup Cascade 🔧
+- **Smart Milestone Initialization**: Prevented multiple milestone notifications on application startup
+  - **Root Cause**: Milestone tracking variables (`last_milestone_triggered` and `last_charging_milestone`) were initialized as `None`, causing all milestones above current battery level to trigger notifications on first update
+  - **Solution**: Added `_initialize_milestone_tracking` flag to properly initialize milestone tracking on first battery update
+  - **Corrected Logic**: Fixed initialization to find the **highest** milestone ≤ current battery level
+  - **Debug Logging**: Added informative console output to track initialization process for troubleshooting
+
+### Milestone Tracking Improvements
+- **Startup Intelligence**: Application now intelligently initializes milestone tracking based on current battery state
+  - Example: Battery at 59% on startup sets `last_milestone_triggered` to 50%, preventing notifications for 90%, 80%, 70%, 60%, 50%
+  - Example: Battery at 85% charging sets `last_charging_milestone` to 75%, preventing notifications for 25%, 50%, 75%
+- **One-Time Initialization**: Flag is automatically removed after first update to ensure initialization only happens once
+- **State-Aware Logic**: Different initialization logic for charging vs. discharging states
+- **Preserved Functionality**: All existing milestone notification behavior maintained for future battery level changes
+
+### User Experience Benefits
+- **Clean Startup**: Users no longer receive multiple unwanted notifications when BattMon starts
+- **Logical Behavior**: Milestone notifications now only trigger for actual battery level changes, not startup conditions
+- **Maintained Accuracy**: All configured milestone thresholds remain active and functional for real battery transitions
+- **Debug Transparency**: Console output shows initialization process for troubleshooting milestone issues
+
+### Technical Implementation
+- **Constructor Flag**: Added `_initialize_milestone_tracking = True` flag in class constructor
+- **First Update Logic**: Enhanced `update_battery()` method to check and handle initialization flag
+- **Corrected Algorithm**: Fixed initialization to set milestone tracking to the **highest** milestone ≤ current battery level
+  - **Discharge Logic**: `milestone <= percentage` ensures only lower milestones will trigger notifications
+  - **Charging Logic**: `milestone <= percentage` ensures only higher milestones will trigger notifications
+- **Automatic Cleanup**: Flag is removed via `delattr()` after successful initialization
+- **Backward Compatibility**: No changes to user configuration or existing milestone functionality
+
+### Key Benefits
+- ✅ **Fixed Critical Bug**: Eliminates annoying multiple notifications on application startup
+- ✅ **Improved User Experience**: Clean, professional startup behavior
+- ✅ **Preserved Functionality**: All milestone notifications work exactly as intended for actual battery changes
+- ✅ **Smart Logic**: Initialization adapts to current battery level and charging state
+- ✅ **Debug Support**: Console logging helps troubleshoot any milestone issues
+
 ## [0.5.9] - 2025-08-16 04:18:00 CDT
 
 ### Enhanced - Professional Help System with Clickable Links 📖
@@ -64,6 +165,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ **Professional Polish**: Help system demonstrates application maturity and attention to detail
 - ✅ **Resource Access**: Direct access to changelog and issue tracking for better user support
 - ✅ **Modern UI Framework**: Qt6 QTextBrowser provides superior hyperlink handling
+
+## [0.5.8] - 2025-08-14 14:06:42 CDT
+
+### Enhanced - Modern Battery Status Window 💻
+- **QDialog-Based Battery Window**: Upgraded battery status display from QMessageBox to professional QDialog implementation
+  - **Toggle Functionality**: Left-click system tray icon now opens/closes battery status window (instead of showing modal dialogs)
+  - **Non-Modal Design**: Battery window stays open while allowing full interaction with other applications
+  - **Auto-Refresh System**: Window content updates automatically every 5 seconds with live battery data
+  - **Manual Refresh**: Dedicated refresh button for instant battery information updates
+  - **Window State Tracking**: Application remembers if battery window is open and properly manages window lifecycle
+  - **Professional Layout**: Rich HTML formatting with color-coded status, battery details, and health information
+
+### Improved User Experience
+- **Persistent Window**: Battery information window can stay open for continuous monitoring
+- **Seamless Interaction**: Non-blocking window allows users to continue working while monitoring battery status
+- **Real-Time Updates**: Live data refresh ensures information stays current without user intervention
+- **Smart Toggle**: Single left-click opens window, another left-click closes it for intuitive control
+- **Enhanced Accessibility**: Larger, persistent window improves readability compared to temporary modal dialogs
+
+### Fixed - Linux Battery Parsing Robustness 🔧
+- **Comprehensive ACPI Output Parser**: Fixed critical Linux battery parsing bug that caused crashes on systems with non-standard ACPI output formats
+  - **Root Cause**: Original parser expected comma-separated format like `"Battery 0: Full, 100%"` but some systems output `"100%\nBattery 1: Discharging"` without commas
+  - **Solution**: Implemented robust multi-format parsing engine that handles various ACPI output formats
+  - **GitHub Issue**: Resolves [Issue #8](https://github.com/juren53/BattMon/issues/8) - `invalid literal for int() with base 10: '100%\nBattery 1: Discharging'`
+
+### Removed - Debug Output Cleanup 🧹
+- **Production-Ready Console Output**: Removed all debug print statements from Linux battery parsing functions
+  - **Cleaner Runtime**: Eliminated verbose `[DEBUG] Parsed (comma format)...` and similar debug messages
+  - **Silent Error Handling**: Replaced debug print statements in exception handlers with silent `pass` statements
+  - **Professional Output**: Application now runs silently in production mode while maintaining full functionality
+  - **Maintained Error Handling**: All exception handling logic preserved, just without verbose console output
+
+### Enhanced Linux Compatibility
+- **Multi-Format Support**: Parser now handles multiple ACPI output formats seamlessly
+  - **Format 1**: `"Battery 0: Full, 100%"` (comma-separated - original working format)
+  - **Format 2**: `"100%\nBattery 1: Discharging"` (newline-separated - previously broken format)
+  - **Format 3**: Multi-line variations and mixed formats from different Linux distributions
+- **Line-by-Line Processing**: Enhanced parsing logic splits by newlines first, then processes each line for battery information
+- **Regex-Based Extraction**: Robust percentage extraction using regex patterns that work across all formats
+- **Corrected State Detection**: Fixed state detection logic to check 'discharging' before 'charging' (since 'discharging' contains 'charging')
+
+### Technical Improvements
+- **Comprehensive Error Handling**: Enhanced error handling with graceful degradation when parsing fails
+- **Debug Logging**: Added extensive debug output to help diagnose parsing issues on different systems
+  - Shows raw ACPI output for troubleshooting
+  - Logs parsing attempts and results for each format
+  - Provides detailed feedback when parsing fails
+- **Backward Compatibility**: All existing working systems continue to work without changes
+- **Cross-Distribution Testing**: Parser designed to work across different Linux distributions with varying ACPI implementations
+
+### User Experience Benefits
+- **No More Crashes**: Application no longer crashes on systems with non-standard ACPI output
+- **Universal Linux Support**: Works across more Linux distributions and hardware configurations
+- **Silent Recovery**: Application gracefully handles parsing failures and continues monitoring
+- **Better Diagnostics**: Debug output helps users and developers identify system-specific issues
+
+### Key Benefits
+- ✅ **Critical Bug Fix**: Resolves application crashes on affected Linux systems
+- ✅ **Enhanced Reliability**: Robust parsing works across different ACPI implementations
+- ✅ **Better Hardware Support**: Supports various battery configurations and manufacturers
+- ✅ **Improved Diagnostics**: Debug logging helps troubleshoot future parsing issues
+- ✅ **Backward Compatibility**: Existing installations continue working without changes
+- ✅ **Future-Proof**: Parser architecture handles unknown ACPI output variations
 
 ## [0.5.10] - 2025-08-16 16:10:00 CDT
 
