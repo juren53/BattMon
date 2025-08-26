@@ -51,9 +51,17 @@ Right-click the tray icon to access:
 - **About**: Application information and version details
 - **Quit**: Close the application
 
+### About Window
+
+The About window displays application information including version details, copyright information, and links to the project repository.
+
+![About Window](Images/About_window.png)
+
 ## Battery Window
 
 The battery window provides detailed information about the battery status in a clean, modern interface.
+
+![Battery Status Window](Images/Status_window.png)
 
 ### Window Features
 - **Large percentage display**: Easy-to-read battery level
@@ -236,4 +244,4 @@ This help documentation covers BattMon Cross-Platform version 0.5.6 and later. F
 For the most up-to-date information, visit the project repository at:
 [https://github.com/juren53/BattMon](https://github.com/juren53/BattMon)
 
-**Last updated**: 2025-08-14 07:20
+**Last updated**: 2025-08-26 13:47
