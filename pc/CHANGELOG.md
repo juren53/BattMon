@@ -6,6 +6,87 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.13] - 2025-08-27 10:40:00 CDT
+
+### Added - Animated GIF Integration and Visual Enhancements 🎬
+- **Animated Battery GIF in About Dialog**: Enhanced about dialog with animated battery cycle demonstration
+  - **40x40 pixel animated GIF**: Shows complete battery discharge and charge cycle animation
+  - **Upper Left Positioning**: Strategically placed in upper left corner with proper alignment flags
+  - **Professional Layout**: Restructured dialog layout with dedicated header section for GIF
+  - **Fallback Support**: Static battery icon fallback when animated GIF is unavailable
+  - **Visual Prominence**: Increased size from 25x25 to 40x40 pixels for better visibility
+
+- **Repository Visual Enhancement**: Added animated battery cycle demo to README.md
+  - **GitHub Integration**: Prominent animated GIF at top of repository README
+  - **Professional Presentation**: Left-aligned with custom margins for optimal visual flow
+  - **80x80 pixel display**: Sized for immediate impact without overwhelming header content
+  - **Asset Management**: Added `battery_cycle_demo.gif` to Images directory for version control
+  - **Marketing Enhancement**: Provides instant visual demonstration of application features
+
+### Enhanced User Experience
+- **Visual Engagement**: About dialog now features animated demonstration of core functionality
+  - **Immediate Understanding**: Users can instantly see what the application does through animation
+  - **Professional Polish**: Animated elements demonstrate application sophistication
+  - **Consistent Branding**: Animation style matches system tray icon animations
+  - **Enhanced Discoverability**: GitHub visitors immediately understand the application purpose
+
+### Documentation Improvements
+- **Updated HELP.md**: Enhanced help documentation with screenshots and timestamp updates
+  - **Visual Documentation**: Added relevant screenshots for better user guidance
+  - **Current Information**: Updated timestamps and version-specific details
+  - **Improved Navigation**: Enhanced documentation flow and user experience
+
+- **Maintained CHANGELOG.md**: Comprehensive change tracking with detailed feature descriptions
+  - **Version Tracking**: Complete history of all changes since last release
+  - **Feature Documentation**: Detailed explanations of new animated GIF features
+  - **User Benefits**: Clear articulation of improvements and enhancements
+
+### Technical Implementation
+- **Qt6 QMovie Integration**: Professional animated GIF handling in about dialog
+  - **Memory Management**: Proper movie reference storage to prevent garbage collection
+  - **Alignment Control**: Precise positioning with Qt alignment flags
+  - **Layout Architecture**: Clean separation of animated elements and text content
+  - **Resource Loading**: Robust file path handling and existence checking
+
+- **Repository Asset Management**: Proper version control of visual assets
+  - **Git Integration**: Animated GIF assets properly tracked in repository
+  - **Path Management**: Consistent relative path references for cross-platform compatibility
+  - **Asset Organization**: Clean Images directory structure for visual resources
+
+### User Interface Improvements
+- **Enhanced About Dialog Layout**: Improved visual hierarchy and information presentation
+  - **Header Section**: Dedicated space for animated demonstration
+  - **Content Organization**: Better separation between visual elements and text information
+  - **Professional Styling**: Consistent with application's modern Qt6 design language
+  - **Responsive Design**: Maintains proper layout across different screen sizes
+
+- **README Visual Enhancement**: Professional repository presentation
+  - **First Impression**: Animated GIF creates immediate engagement for GitHub visitors
+  - **Feature Demonstration**: Visual proof of concept shows real application behavior
+  - **Professional Marketing**: Enhanced repository appearance attracts more users
+  - **Clear Value Proposition**: Animation demonstrates unique battery monitoring capabilities
+
+### Code Quality and Maintenance
+- **Clean Git History**: Well-organized commits with descriptive messages
+  - **Logical Progression**: Each commit represents a discrete, meaningful improvement
+  - **Professional Commit Messages**: Detailed descriptions with bullet-pointed changes
+  - **Version Control Best Practices**: Proper staging and organized change management
+
+- **Cache Management**: Cleaned up Python cache files and temporary directories
+  - **Development Hygiene**: Removed __pycache__ directories and temporary files
+  - **Repository Cleanliness**: Maintained clean working directory structure
+  - **Git Ignore**: Proper handling of generated files and development artifacts
+
+### Key Benefits
+- ✅ **Enhanced Visual Appeal**: Animated elements demonstrate professional application quality
+- ✅ **Improved User Onboarding**: New users immediately understand application functionality
+- ✅ **Professional Presentation**: Both application and repository showcase modern design standards
+- ✅ **Better Marketing**: GitHub repository now has compelling visual demonstration
+- ✅ **Consistent Branding**: Animated elements reinforce application's battery monitoring focus
+- ✅ **Enhanced Discoverability**: Visual demonstrations attract more users and contributors
+- ✅ **Technical Excellence**: Proper Qt6 animation handling with robust error management
+- ✅ **Documentation Quality**: Comprehensive change tracking and visual enhancement documentation
+
 ## [0.5.12] - 2025-08-19 00:30:00 CDT
 
 ### Added - Standalone Profile Editor with GUI Configuration Management 🔧
