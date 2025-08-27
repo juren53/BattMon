@@ -1,8 +1,9 @@
-# BattMon PC - Battery Monitor for Linux, PCs and Macs
 
-<div align="center">
-  <img src="Images/battery_cycle_demo.gif" alt="BattMon Battery Cycle Animation" width="80" height="80">
+<div align="left" style="margin-top: 20px; margin-left: 20px;">
+<img src="Images/battery_cycle_demo.gif" alt="BattMon Battery Cycle Animation" width="80" height="80">
 </div>
+
+# BattMon PC - Battery Monitor for Linux, PCs and Macs
 
 A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a clean, highly readable rectangular battery icon design.
 
