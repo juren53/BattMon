@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BattMon Cross-Platform (bm_x) - Battery Monitor for Linux and Windows
-Version 0.5.12 - Profile Editor Integration with Enhanced User Configuration
+Version 0.5.13 - Animated GIF Integration and Visual Enhancements
 
 Change Log at:  https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md
 
@@ -39,7 +39,7 @@ except ImportError:
     sys.exit(1)
 
 # Cross-platform constants
-VERSION = '0.5.12'
+VERSION = '0.5.13'
 TIMEOUT = 2000  # milliseconds
 config = False
 config_path = os.path.expanduser('~/.battmon')
