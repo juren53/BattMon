@@ -28,7 +28,7 @@ try:
                                  QWidget, QVBoxLayout, QHBoxLayout, QLabel, QProgressBar,
                                  QPushButton)
     from PyQt6.QtCore import QTimer, Qt, pyqtSignal, QSize
-    from PyQt6.QtGui import QIcon, QPixmap, QPainter, QBrush, QColor, QPen, QFont, QAction, QPolygon
+    from PyQt6.QtGui import QIcon, QPixmap, QPainter, QBrush, QColor, QPen, QFont, QAction, QPolygon, QMovie
     QT6_AVAILABLE = True
 except ImportError:
     print("PyQt6 not found. Please install it with:")
@@ -1059,16 +1059,68 @@ Platform: """ + CURRENT_OS
                                    f"Help system error. Please visit:\nhttps://github.com/juren53/BattMon\n\nVersion: {VERSION}")
     
     def show_about(self):
-        """Show about dialog"""
-        current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S CDT")
-        about_text = f"""<h2>BattMon Cross-Platform - Battery Monitor</h2>
+        """Show about dialog with animated GIF"""
+        try:
+            from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton
+            from PyQt6.QtCore import QSize
+            
+            # Create custom dialog
+            about_dialog = QDialog()
+            about_dialog.setWindowTitle("About BattMon Cross-Platform")
+            about_dialog.setMinimumSize(QSize(600, 500))
+            about_dialog.resize(QSize(650, 550))
+            
+            # Create layout
+            main_layout = QVBoxLayout()
+            
+            # Create top layout with animated GIF in upper left corner
+            header_layout = QHBoxLayout()
+            
+            # Left side - Animated GIF in upper left corner
+            gif_label = QLabel()
+            gif_path = os.path.join(os.path.dirname(__file__), 'Images', 'animated_battery_cycle_slow.gif')
+            
+            if os.path.exists(gif_path):
+                movie = QMovie(gif_path)
+                gif_label.setMovie(movie)
+                gif_label.setMaximumSize(QSize(40, 40))
+                gif_label.setMinimumSize(QSize(40, 40))
+                gif_label.setScaledContents(True)
+                gif_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+                movie.start()
+                
+                # Store movie reference to prevent garbage collection
+                about_dialog._movie = movie
+            else:
+                # Fallback to static icon if GIF not found
+                static_icon = self.create_battery_icon(75, False, 64)
+                gif_label.setPixmap(static_icon.pixmap(40, 40))
+                gif_label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+            
+            header_layout.addWidget(gif_label)
+            header_layout.addStretch()  # Push GIF to the left
+            main_layout.addLayout(header_layout)
+            
+            # Main title and info text
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S CDT")
+            about_text = f"""<h2>BattMon Cross-Platform</h2>
+<h3>Battery Monitor</h3>
 
 <p><b>Version:</b> {VERSION}<br>
 <b>Build Date:</b> {current_time}<br>
 <b>Qt Version:</b> {QApplication.instance().applicationVersion()}<br>
 <b>Framework:</b> PyQt6<br>
-<b>Platform:</b> {CURRENT_OS} ({platform.platform()})</p>
-
+<b>Platform:</b> {CURRENT_OS} ({platform.platform()})</p>"""
+            
+            text_label = QLabel()
+            text_label.setTextFormat(Qt.TextFormat.RichText)
+            text_label.setText(about_text)
+            text_label.setWordWrap(True)
+            
+            main_layout.addWidget(text_label)
+            
+            # Features section
+            features_text = """<h3>Features</h3>
 <p>A modern Qt6-based cross-platform battery monitoring application featuring:</p>
 <ul>
 <li>Cross-platform support (Linux, Windows, macOS)</li>
@@ -1084,7 +1136,6 @@ Platform: """ + CURRENT_OS
 <li>High DPI display support</li>
 </ul>
 
-
 <p>Developed with Python 3 + PyQt6<br>
 License: GPL v2+</p>
 
@@ -1092,13 +1143,51 @@ License: GPL v2+</p>
 📖 <a href="https://github.com/juren53/BattMon" target="_blank">View project on GitHub</a><br>
 📋 <a href="https://github.com/juren53/BattMon/blob/main/pc/CHANGELOG.md" target="_blank">View changelog</a>
 </p>"""
-        
-        msg_box = QMessageBox()
-        msg_box.setWindowTitle("About BattMon Cross-Platform")
-        msg_box.setTextFormat(Qt.TextFormat.RichText)
-        msg_box.setText(about_text)
-        msg_box.setIconPixmap(self.create_battery_icon(75, False).pixmap(64, 64))
-        msg_box.exec()
+            
+            features_label = QLabel()
+            features_label.setTextFormat(Qt.TextFormat.RichText)
+            features_label.setText(features_text)
+            features_label.setWordWrap(True)
+            features_label.setOpenExternalLinks(True)
+            
+            main_layout.addWidget(features_label)
+            
+            # Button layout
+            button_layout = QHBoxLayout()
+            button_layout.addStretch()
+            
+            # Close button
+            close_button = QPushButton("Close")
+            close_button.clicked.connect(about_dialog.accept)
+            close_button.setMinimumSize(QSize(100, 35))
+            
+            button_layout.addWidget(close_button)
+            main_layout.addLayout(button_layout)
+            
+            about_dialog.setLayout(main_layout)
+            
+            # Set dialog icon (static)
+            about_dialog.setWindowIcon(self.create_battery_icon(75, False, 24))
+            
+            # Show dialog
+            about_dialog.exec()
+            
+        except Exception as e:
+            print(f"Error showing about dialog: {e}")
+            # Fallback to simple message box
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S CDT")
+            fallback_text = f"""BattMon Cross-Platform v{VERSION}
+Battery Monitor
+
+Platform: {CURRENT_OS}
+Build Date: {current_time}
+Framework: PyQt6
+
+License: GPL v2+
+
+For more info: https://github.com/juren53/BattMon"""
+            
+            QMessageBox.information(None, "About BattMon Cross-Platform", fallback_text)
     
     def show_profile_editor(self):
         """Show the Profile Editor dialog"""
