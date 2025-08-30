@@ -1,6 +1,12 @@
 # BattMon Cross-Platform Windows Installation Script
-# Version 1.0 - Installs BattMon without cloning the entire repository
+# Version 1.1 - Installs BattMon v0.5.13 with Profile Editor and animated GIF features
+# Designed for BattMon v0.5.13 (August 2025) - includes Profile Management GUI and visual enhancements
 # Supports Windows 10/11 with PowerShell 5.1+
+#
+# New in this version:
+# - Downloads profile_editor.py module for GUI configuration management
+# - Downloads animated GIF assets for enhanced About dialog
+# - Supports all features added in BattMon v0.5.9 through v0.5.13
 
 param(
     [switch]$NoInteractive,
@@ -196,6 +202,17 @@ function Download-BattMonFiles {
         Invoke-WebRequest -Uri $battmonUrl -OutFile $battmonPath -UseBasicParsing
         Write-Success "Downloaded battmon.py"
         
+        # Download Profile Editor module (New in v0.5.12)
+        try {
+            $profileEditorUrl = "$GitHubRaw/profile_editor.py"
+            $profileEditorPath = Join-Path $InstallPath "profile_editor.py"
+            Invoke-WebRequest -Uri $profileEditorUrl -OutFile $profileEditorPath -UseBasicParsing
+            Write-Success "Downloaded profile_editor.py (Profile Management GUI)"
+        }
+        catch {
+            Write-Warning "Failed to download profile_editor.py (Profile Editor will not be available)"
+        }
+        
         # Download help file
         try {
             $helpUrl = "$GitHubRaw/HELP.md"
@@ -216,6 +233,43 @@ function Download-BattMonFiles {
         }
         catch {
             Write-Warning "Failed to download requirements file"
+        }
+        
+        # Download animated GIF assets (New in v0.5.13)
+        try {
+            Write-Info "Downloading animated GIF assets..."
+            $imagesDir = Join-Path $InstallPath "Images"
+            New-Item -ItemType Directory -Path $imagesDir -Force | Out-Null
+            
+            # Download animated battery cycle GIF for About dialog
+            $gifUrl = "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/animated_battery_cycle_slow.gif"
+            $gifPath = Join-Path $imagesDir "animated_battery_cycle_slow.gif"
+            Invoke-WebRequest -Uri $gifUrl -OutFile $gifPath -UseBasicParsing
+            Write-Success "Downloaded animated_battery_cycle_slow.gif (About dialog animation)"
+            
+            # Optionally download other image assets
+            try {
+                $aboutPngUrl = "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/About_window.png"
+                $aboutPngPath = Join-Path $imagesDir "About_window.png"
+                Invoke-WebRequest -Uri $aboutPngUrl -OutFile $aboutPngPath -UseBasicParsing
+                Write-Success "Downloaded About_window.png"
+            }
+            catch {
+                Write-Info "About_window.png not downloaded (optional)"
+            }
+            
+            try {
+                $statusPngUrl = "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/Status_window.png"
+                $statusPngPath = Join-Path $imagesDir "Status_window.png"
+                Invoke-WebRequest -Uri $statusPngUrl -OutFile $statusPngPath -UseBasicParsing
+                Write-Success "Downloaded Status_window.png"
+            }
+            catch {
+                Write-Info "Status_window.png not downloaded (optional)"
+            }
+        }
+        catch {
+            Write-Warning "Failed to download animated GIF assets (About dialog will use static fallback)"
         }
         
         return $true
@@ -312,20 +366,40 @@ function Test-Installation {
     Write-Info "Testing BattMon installation..."
     
     try {
+        # Test main application
         $battmonPath = Join-Path $InstallPath "battmon.py"
         if (-not (Test-Path $battmonPath)) {
             throw "battmon.py not found"
         }
+        Write-Success "Main application (battmon.py) verified"
         
-        # Test PyQt6 import
-        & $PythonPath -c "from PyQt6.QtWidgets import QApplication; print('Dependencies verified')" 2>&1 | Out-Null
+        # Test Profile Editor module (v0.5.12+)
+        $profileEditorPath = Join-Path $InstallPath "profile_editor.py"
+        if (Test-Path $profileEditorPath) {
+            Write-Success "Profile Editor module (profile_editor.py) verified"
+        }
+        else {
+            Write-Warning "Profile Editor module not found (GUI configuration will not be available)"
+        }
+        
+        # Test animated GIF assets (v0.5.13+)
+        $gifPath = Join-Path $InstallPath "Images\animated_battery_cycle_slow.gif"
+        if (Test-Path $gifPath) {
+            Write-Success "Animated GIF assets verified"
+        }
+        else {
+            Write-Warning "Animated GIF not found (About dialog will use static fallback)"
+        }
+        
+        # Test PyQt6 import and QMovie support
+        & $PythonPath -c "from PyQt6.QtWidgets import QApplication; from PyQt6.QtGui import QMovie; print('Dependencies verified')" 2>&1 | Out-Null
         
         if ($LASTEXITCODE -eq 0) {
-            Write-Success "BattMon installation verified"
+            Write-Success "PyQt6 and QMovie support verified"
             return $true
         }
         else {
-            throw "PyQt6 import failed"
+            throw "PyQt6 or QMovie import failed"
         }
     }
     catch {
@@ -358,16 +432,20 @@ function Show-CompletionMessage {
         Write-Host "`"$LauncherPath`"" -ForegroundColor Yellow
     }
     Write-Host ""
-    Write-Host "✨ Features:" -ForegroundColor Green
+    Write-Host "✨ Features (v0.5.13):" -ForegroundColor Green
     Write-Host "  • System tray battery monitoring with percentage display"
     Write-Host "  • Color-coded battery levels and charging indicators"
     Write-Host "  • Desktop notifications for battery milestones"
     Write-Host "  • Detailed battery health information"
+    Write-Host "  • 🔧 Profile Editor GUI for settings management (NEW)"
+    Write-Host "  • 🎬 Animated GIF demonstrations in About dialog (NEW)"
+    Write-Host "  • 💻 Persistent QDialog battery status window (NEW)"
+    Write-Host "  • 📖 Professional help system with documentation (NEW)"
     Write-Host "  • Cross-platform compatibility (Windows, Linux, macOS)"
     Write-Host ""
     Write-Host "🎯 Usage:" -ForegroundColor Green
-    Write-Host "  • Left-click tray icon: Show detailed battery window"
-    Write-Host "  • Right-click tray icon: Context menu with options"
+    Write-Host "  • Left-click tray icon: Show/hide detailed battery window"
+    Write-Host "  • Right-click tray icon: Context menu with Profile Editor"
     Write-Host "  • System tray icon shows real-time battery percentage"
     Write-Host ""
     Write-Host "🔄 To update BattMon, simply re-run this installer" -ForegroundColor Yellow

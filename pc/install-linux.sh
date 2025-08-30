@@ -1,6 +1,13 @@
 #!/bin/bash
 # BattMon Cross-Platform Linux Installation Script
-# Version 1.0 - Installs BattMon without cloning the entire repository
+# Version 1.1 - Installs BattMon v0.5.13 with Profile Editor and animated GIF features
+# Designed for BattMon v0.5.13 (August 2025) - includes Profile Management GUI and visual enhancements
+#
+# New in this version:
+# - Downloads profile_editor.py module for GUI configuration management
+# - Downloads animated GIF assets for enhanced About dialog
+# - Supports all features added in BattMon v0.5.9 through v0.5.13
+# - Enhanced testing for new modules and QMovie support
 
 set -e  # Exit on any error
 
@@ -217,11 +224,43 @@ download_battmon() {
         exit 1
     fi
     
+    # Download Profile Editor module (New in v0.5.12)
+    if curl -fsSL "$GITHUB_RAW/profile_editor.py" -o "$BATTMON_DIR/profile_editor.py"; then
+        print_success "Downloaded profile_editor.py (Profile Management GUI)"
+        chmod +x "$BATTMON_DIR/profile_editor.py"
+    else
+        print_warning "Failed to download profile_editor.py (Profile Editor will not be available)"
+    fi
+    
     # Download help file
     if curl -fsSL "$GITHUB_RAW/HELP.md" -o "$BATTMON_DIR/HELP.md"; then
         print_success "Downloaded HELP.md"
     else
         print_warning "Failed to download HELP.md (help system will use fallback)"
+    fi
+    
+    # Download animated GIF assets (New in v0.5.13)
+    print_info "Downloading animated GIF assets..."
+    mkdir -p "$BATTMON_DIR/Images"
+    
+    # Download animated battery cycle GIF for About dialog
+    if curl -fsSL "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/animated_battery_cycle_slow.gif" -o "$BATTMON_DIR/Images/animated_battery_cycle_slow.gif"; then
+        print_success "Downloaded animated_battery_cycle_slow.gif (About dialog animation)"
+    else
+        print_warning "Failed to download animated GIF assets (About dialog will use static fallback)"
+    fi
+    
+    # Optionally download screenshot assets
+    if curl -fsSL "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/About_window.png" -o "$BATTMON_DIR/Images/About_window.png" 2>/dev/null; then
+        print_success "Downloaded About_window.png"
+    else
+        print_info "About_window.png not downloaded (optional)"
+    fi
+    
+    if curl -fsSL "https://raw.githubusercontent.com/juren53/BattMon/main/pc/Images/Status_window.png" -o "$BATTMON_DIR/Images/Status_window.png" 2>/dev/null; then
+        print_success "Downloaded Status_window.png"
+    else
+        print_info "Status_window.png not downloaded (optional)"
     fi
     
     # Make the main script executable
@@ -308,25 +347,43 @@ update_path() {
 test_installation() {
     print_info "Testing BattMon installation..."
     
-    # Test if the script can run
+    # Test main application
     if [ -f "$BATTMON_DIR/battmon.py" ]; then
-        if python3 -c "
+        print_success "Main application (battmon.py) verified"
+    else
+        print_error "BattMon script not found"
+        return 1
+    fi
+    
+    # Test Profile Editor module (v0.5.12+)
+    if [ -f "$BATTMON_DIR/profile_editor.py" ]; then
+        print_success "Profile Editor module (profile_editor.py) verified"
+    else
+        print_warning "Profile Editor module not found (GUI configuration will not be available)"
+    fi
+    
+    # Test animated GIF assets (v0.5.13+)
+    if [ -f "$BATTMON_DIR/Images/animated_battery_cycle_slow.gif" ]; then
+        print_success "Animated GIF assets verified"
+    else
+        print_warning "Animated GIF not found (About dialog will use static fallback)"
+    fi
+    
+    # Test PyQt6 and QMovie support
+    if python3 -c "
 import sys
 sys.path.insert(0, '$BATTMON_DIR')
 try:
     from PyQt6.QtWidgets import QApplication
-    print('PyQt6 import successful')
+    from PyQt6.QtGui import QMovie
+    print('PyQt6 and QMovie import successful')
 except ImportError as e:
-    print(f'PyQt6 import failed: {e}')
+    print(f'PyQt6 or QMovie import failed: {e}')
     sys.exit(1)
-        " 2>/dev/null; then
-            print_success "BattMon dependencies verified"
-        else
-            print_error "BattMon dependency check failed"
-            return 1
-        fi
+    " 2>/dev/null; then
+        print_success "PyQt6 and QMovie support verified"
     else
-        print_error "BattMon script not found"
+        print_error "BattMon dependency check failed"
         return 1
     fi
     
@@ -360,17 +417,21 @@ show_usage_instructions() {
     echo "  2. From application menu: Search for 'BattMon Cross-Platform'"
     echo "  3. Add to startup: Use your DE's startup applications settings"
     echo ""
-    echo -e "${GREEN}Features:${NC}"
+    echo -e "${GREEN}Features (v0.5.13):${NC}"
     echo "  • System tray battery monitoring with percentage display"
     echo "  • Color-coded battery levels (Red/Orange/Yellow/Green)"
     echo "  • Desktop notifications for battery milestones"
     echo "  • Detailed battery health information window"
+    echo "  • 🔧 Profile Editor GUI for settings management (NEW)"
+    echo "  • 🎬 Animated GIF demonstrations in About dialog (NEW)"
+    echo "  • 💻 Persistent QDialog battery status window (NEW)"
+    echo "  • 📖 Professional help system with documentation (NEW)"
     echo "  • Cross-platform compatibility (Linux, Windows, macOS)"
     echo "  • Charging indicators and time remaining estimates"
     echo ""
     echo -e "${GREEN}Usage:${NC}"
-    echo "  • Left-click tray icon: Show detailed battery window"
-    echo "  • Right-click tray icon: Context menu with options"
+    echo "  • Left-click tray icon: Show/hide detailed battery window"
+    echo "  • Right-click tray icon: Context menu with Profile Editor"
     echo "  • Hover over tray icon: Battery status tooltip"
     echo ""
     echo -e "${YELLOW}Next steps:${NC}"
