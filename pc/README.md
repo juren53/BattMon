@@ -3,105 +3,159 @@
 <img src="Images/battery_cycle_demo.gif" alt="BattMon Battery Cycle Animation" width="80" height="80">
 </div>
 
-# BattMon PC - Battery Monitor for Linux, PCs and Macs
+# BattMon Cross-Platform - Battery Monitor for Windows, Linux & macOS
 
-A modern Python 3 battery monitoring application that displays battery percentage directly in your system tray with a clean, highly readable rectangular battery icon design.
+A modern **PyQt6-based** cross-platform battery monitoring application with **Profile Editor GUI**, **animated demonstrations**, and professional system integration. Displays battery percentage directly in your system tray with intelligent color coding and comprehensive battery health information.
+
+## 🚀 Quick Installation
+
+### Windows (PowerShell)
+```powershell
+iwr https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.ps1 -UseBasicParsing | iex
+```
+
+### Linux (Bash)
+```bash
+curl -fsSL https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-linux.sh | bash
+```
+
+### Manual Installation (Two Steps)
+**Windows:**
+```powershell
+# Download script
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-windows.ps1" -OutFile "install-windows.ps1"
+# Review and run
+.\install-windows.ps1
+```
+
+**Linux:**
+```bash
+# Download script
+curl -fsSL -o install-linux.sh https://raw.githubusercontent.com/juren53/BattMon/main/pc/install-linux.sh
+# Review and run
+chmod +x install-linux.sh && ./install-linux.sh
+```
+
+### What the Installers Do:
+- ✅ **Install Python 3.8+ and PyQt6** dependencies automatically
+- ✅ **Download BattMon v0.5.13** with Profile Editor GUI
+- ✅ **Create system integration** (shortcuts, launchers, desktop entries)
+- ✅ **Set up animated GIF assets** and professional help system  
+- ✅ **Configure PATH** for easy command-line access
+- ✅ **Test installation** and verify all components
+
+---
 
 ## Features
 
 ### 🔋 Ultra-Readable Battery Display
-- **Large percentage numbers** (font size 9-13px) displayed directly in system tray
-- **Rectangular battery shape** with terminal for realistic appearance
-- **Color-coded background**: Red (0-25%), Orange (26-75%), Green (76-100%)
-- **High contrast design**: White text with thick black outline on colored background
-- **Prominent charging indicator**: Bright yellow lightning bolt with white outline when plugged in
-- **Works on any theme**: Light, dark, or custom system tray themes
+- **Dynamic percentage display** directly in system tray with real-time updates
+- **Color-coded battery levels**: Red (0-29%), Orange (30-49%), Yellow (50-74%), Green (75-100%)
+- **Charging indicators**: Lightning bolt animation and visual feedback
+- **Pulsing animation** for low battery warnings
+- **High DPI support** for crisp display on all screen types
+- **Cross-platform compatibility**: Works on Windows, Linux, and macOS
 
-### 🖱️ Interactive Features
-- **Left-click**: Show detailed battery notification
-- **Right-click**: Context menu with battery info, about dialog, and quit option
-- **About dialog**: Version information and last update timestamp
-- **Tooltip**: Hover for current battery status and time remaining
-- **Smart notifications**: Only shows console output for significant changes (5% or state changes)
+### 🖱️ Interactive Features (v0.5.13)
+- **Left-click**: Show/hide **persistent battery status window** with detailed information
+- **Right-click**: Context menu with **Profile Editor**, battery info, about dialog, and help
+- **🔧 Profile Editor GUI**: Modern interface for configuring all settings (NEW)
+- **🎬 Animated About dialog**: Features battery cycle demonstration GIF (NEW)
+- **📖 Professional help system**: Integrated documentation and support (NEW)
+- **Smart tooltips**: Hover for current battery status and time remaining
+- **Desktop notifications**: Configurable alerts for battery milestones
 
-### ⚡ Technical Features
-- **Python 3** with GTK3 system tray integration
-- **Custom Cairo graphics** for crisp, scalable icons
-- **ACPI integration** for reliable battery status
-- **Configurable**: Easy-to-edit configuration file
-- **Lightweight**: Minimal resource usage with 2-second update interval
+### ⚡ Advanced Technical Features (PyQt6-based)
+- **Modern PyQt6 framework** with native system integration
+- **Cross-platform battery detection**: ACPI (Linux), WMI/PowerShell (Windows), pmset (macOS)
+- **JSON configuration system** with Profile Editor GUI
+- **QDialog battery windows** with auto-refresh and manual refresh buttons
+- **QMovie animated GIF support** for visual demonstrations
+- **Virtual environment support** on Linux for isolated dependencies
+- **Professional error handling** and graceful fallbacks
+- **Milestone tracking system** with customizable thresholds
 
 ## Requirements
 
-- Python 3.x
-- GTK 3 with GObject Introspection
-- Cairo graphics library
-- ACPI utilities (`acpi` command)
-- Linux with system tray support
+**Automatically handled by installers** - No manual setup needed!
 
-### Install Dependencies (Ubuntu/Debian/Mint):
-```bash
-sudo apt install python3 python3-gi python3-gi-cairo gir1.2-gtk-3.0 acpi
+- **Python 3.8+** (auto-installed by installers)
+- **PyQt6 6.4.0+** (auto-installed)
+- **Platform-specific battery utilities**:
+  - **Windows**: WMI/PowerShell (built-in)
+  - **Linux**: ACPI utilities (auto-installed)
+  - **macOS**: pmset (built-in)
+
+### Manual Installation Requirements:
+If not using the automated installers:
+
+**Windows:**
+```powershell
+pip install "PyQt6>=6.4.0"
 ```
 
-## Installation
-
-1. Clone this repository:
+**Linux (Ubuntu/Debian):**
 ```bash
-git clone https://github.com/juren53/BattMon.git
-cd BattMon/pc/
+sudo apt install python3 python3-pip python3-venv acpi
+pip install "PyQt6>=6.4.0"
 ```
 
-2. Make the script executable:
+**macOS:**
 ```bash
-chmod +x battmon.py
+brew install python3
+pip3 install "PyQt6>=6.4.0"
 ```
-
-3. The configuration file `~/.battmon` will be created automatically on first run with sensible defaults.
 
 ## Usage
 
-### Run BattMon:
-```bash
-python3 battmon.py
-# or
-./battmon.py
-```
+### After Installation:
+**Windows:**
+- Search for "BattMon Cross-Platform" in Start Menu, or
+- Run `python "C:\Users\[username]\AppData\Local\BattMon\battmon.py"`
 
-### Run in Background:
+**Linux:**
+- Search for "BattMon Cross-Platform" in application menu, or
+- Run `battmon` from terminal (if added to PATH)
+
+### Manual Run:
 ```bash
-python3 battmon.py &
+# If you cloned the repository manually
+python3 battmon.py
 ```
 
 ### Add to Startup:
-Add the following line to your autostart applications:
-```bash
-/path/to/BattMon/pc/battmon.py
-```
+- **Windows**: Use Task Scheduler or Startup folder
+- **Linux**: Add to your desktop environment's startup applications
+- **macOS**: Add to Login Items in System Preferences
 
 ## Configuration
 
-The configuration file is located at `~/.battmon`. You can customize:
-- Click commands
-- Battery level thresholds
-- Icon preferences (fallback to system icons if custom drawing fails)
+### 🔧 Profile Editor GUI (Recommended)
+1. **Right-click** the BattMon system tray icon
+2. Select **"Profile Editor"** from context menu
+3. Configure settings in the **modern GUI interface**:
+   - Notification settings and timeouts
+   - Battery alert thresholds (discharge/charging)
+   - Audio alerts and sleep/wake notifications
+   - Advanced options
 
-Example config:
-```ini
-[general]
-command = notify-send "Battery Status" "Click to see detailed battery information"
+### Manual Configuration (JSON)
+Configuration is stored in JSON format:
+- **Windows**: `%APPDATA%\BattMon\profile.json`
+- **Linux**: `~/.config/battmon/profile.json`
+- **macOS**: `~/Library/Application Support/battmon/profile.json`
 
-[empty]
-percent = 5
-icon = battery-level-0-symbolic
-charge_icon = battery-level-0-charging-symbolic
-
-[low]
-percent = 25
-icon = battery-level-20-symbolic
-charge_icon = battery-level-20-charging-symbolic
-
-# ... more battery levels
+Example profile.json:
+```json
+{
+  "milestone_thresholds": [90, 80, 70, 60, 50, 40, 30, 20, 10],
+  "charging_milestones": [25, 50, 75, 90, 100],
+  "notifications_enabled": true,
+  "notification_timeout": 5000,
+  "play_sound": true,
+  "sleep_notifications_enabled": true,
+  "sleep_threshold": 300
+}
 ```
 
 ## Design Philosophy
@@ -120,33 +174,84 @@ charge_icon = battery-level-20-charging-symbolic
 
 ## Troubleshooting
 
-### Icon not visible:
+### Installation Issues:
+- **PowerShell execution policy (Windows)**: Run `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` if needed
+- **Internet connection**: Ensure stable internet for downloading components
+- **Python version**: Verify Python 3.8+ is installed (`python3 --version`)
+
+### Runtime Issues:
+
+**System tray icon not visible:**
 - Ensure your desktop environment supports system tray icons
-- Check if `acpi` command works: `acpi -b`
-- Verify GTK3 dependencies are installed
+- **Linux**: Check if `acpi -b` works for battery detection
+- **Windows**: Verify PyQt6 installation: `python -c "from PyQt6.QtWidgets import QApplication"`
+- **macOS**: Check system tray visibility settings
 
-### Permission issues:
-- Make sure the script is executable: `chmod +x battmon.py`
-- Verify config file permissions: `ls -la ~/.battmon`
+**Profile Editor not opening:**
+- Ensure `profile_editor.py` was downloaded during installation
+- Check that PyQt6 is properly installed
+- Try running: `python profile_editor.py` standalone
 
-### High CPU usage:
-- Normal update interval is 2 seconds
-- Check for error messages in console output
+**Animated GIF not showing:**
+- Verify `Images/animated_battery_cycle_slow.gif` exists in installation directory
+- Check PyQt6 QMovie support: `python -c "from PyQt6.QtGui import QMovie"`
+
+**High CPU usage:**
+- Normal update interval is 5 seconds
+- Check console for error messages
+- Restart BattMon if issues persist
+
+### Getting Help:
+- Check the built-in **Help** system (right-click tray icon → Help)
+- Visit the [GitHub Issues](https://github.com/juren53/BattMon/issues) page
+- Review the [CHANGELOG.md](CHANGELOG.md) for recent updates
 
 ## Development
 
-Converted from Python 2 to Python 3 with modern GTK3 integration. The original design was evolved into a rectangular battery shape optimized for maximum text readability and realistic battery appearance.
+**BattMon Cross-Platform** is built with **modern PyQt6** and designed for cross-platform compatibility. The application has evolved from a GTK3-based Linux-only tool to a comprehensive cross-platform solution.
 
-### Key Components:
-- **MainApp class**: Core application logic and GTK integration
-- **create_battery_icon_with_text()**: Custom Cairo graphics for battery icon
-- **ACPI integration**: Battery status detection via `acpi` command
-- **Configuration system**: INI-style config file support
+### Architecture (v0.5.13):
+- **BattMonCrossPlatform class**: Main application with PyQt6 integration
+- **ProfileEditor class**: Standalone GUI configuration module
+- **Cross-platform battery detection**: Platform-specific implementations
+- **QDialog system**: Modern windowing with persistent status displays
+- **JSON configuration**: Human-readable settings with GUI editor
+- **QMovie animations**: Integrated GIF demonstrations
+- **Professional error handling**: Graceful fallbacks and user feedback
+
+### Key Files:
+- `battmon.py` - Main application (v0.5.13)
+- `profile_editor.py` - Profile Management GUI (v0.5.12+)
+- `HELP.md` - Integrated help system
+- `Images/` - Visual assets and animations
+- `install-windows.ps1` / `install-linux.sh` - Installation scripts
+
+### Development Setup:
+```bash
+git clone https://github.com/juren53/BattMon.git
+cd BattMon/pc
+pip install "PyQt6>=6.4.0"
+python3 battmon.py
+```
 
 ## License
 
-GPL v2+ - See source code for full license text.
+**GPL v2+** - See source code for full license text.
 
 ## Contributing
 
-Contributions welcome! Please test on various Linux distributions and desktop environments.
+Contributions welcome! Please test on various operating systems and desktop environments.
+
+### Areas for Contribution:
+- **macOS testing and optimization**
+- **Additional Linux distribution support**
+- **Windows feature enhancements**
+- **Translation and internationalization**
+- **Documentation improvements**
+- **UI/UX enhancements**
+
+### Reporting Issues:
+1. Check existing [GitHub Issues](https://github.com/juren53/BattMon/issues)
+2. Include your OS, Python version, and PyQt6 version
+3. Provide console output if available
+4. Describe steps to reproduce the issue
